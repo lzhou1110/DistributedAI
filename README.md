@@ -33,8 +33,8 @@ The tensorflow mnist examples were from: <code>https://github.com/ianlewis/tenso
 
 This project is led by (in alphabetic order):
 
-* [Chao Wu]() @zju
-* [Jun Xiao]() @zju
+* [Chao Wu]() @wuchaozju
+* [Jun Xiao](junx@cs.zju.edu.cn) junx@cs.zju.edu.cn
      
 
 ## License

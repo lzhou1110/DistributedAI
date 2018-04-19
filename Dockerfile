@@ -25,7 +25,6 @@ RUN pip install --upgrade pdfkit
 RUN pip install \
     graphviz==0.4.10 \
     git+git://github.com/robjstan/tikzmagic.git \
-    git+https://github.com/uclmr/egal.git@v0.2.1 \
     hide_code \
     python-crfsuite
 
@@ -38,8 +37,5 @@ RUN jupyter-nbextension enable rise --py --sys-prefix && \
     jupyter-nbextension enable egal --py --sys-prefix && \
     jupyter-nbextension enable hide_code --py --sys-prefix && \
     jupyter-serverextension enable hide_code --py --sys-prefix
-
-# Customisation
-COPY .jupyter $HOME/
 
 WORKDIR /home/zju/work

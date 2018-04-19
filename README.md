@@ -19,7 +19,7 @@ We assume you have a command line interface (CLI) in your OS
 
 Go to the [docker webpage](https://www.docker.com/) and follow the instruction for your platform.
 
-#### Download Stat-NLP-Book Image
+#### Download Image
 
 Next you can download the docker image:
 
@@ -33,7 +33,7 @@ You can use the git installation in the docker container to get the repository:
 
 Note: this will create a new `DistributedAI` directory in your current directory.
 
-#### Change into Stat-NLP-Book directory
+#### Change into directory
 
     cd DistributedAI
 
@@ -48,12 +48,12 @@ You are now ready to visit the jupyter notebook at http://localhost:8888
 ## Usage
 
 Once installed you can always run your notebook server by first changing
-into your local `stat-nlp-book` directory, and then executing:
+into your local `DistributedAI` directory, and then executing:
 
     docker run -it --rm -p 8888:8888 -v "$(pwd)":/home/zju/work lzhou1110/distributed_ai_zju 
     
 This is **assuming that your docker daemon is running** and that you are
-**in the `stat-nlp-book` directory**. How to run the docker daemon
+**in the `DistributedAI` directory**. How to run the docker daemon
 depends on your system.
 
 

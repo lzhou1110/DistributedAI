@@ -28,12 +28,15 @@ RUN pip install \
     hide_code \
     python-crfsuite
 
-RUN jupyter-nbextension install rise --py --sys-prefix && \
-    jupyter nbextension install hide_code --py --sys-prefix
+RUN jupyter nbextension install rise --py --sys-prefix && \
+    jupyter nbextension install hide_code --py --sys-prefix && \
+    jupyter nbextension install --user https://rawgithub.com/minrk/ipython_extensions/master/nbextensions/toc.js && \
+    curl -L https://rawgithub.com/minrk/ipython_extensions/master/nbextensions/toc.css > $(jupyter --data-dir)/nbextensions/toc.css
 
-RUN jupyter-nbextension enable rise --py --sys-prefix && \
-    jupyter-nbextension enable calico-spell-check --sys-prefix && \
-    jupyter-nbextension enable hide_code --py --sys-prefix && \
-    jupyter-serverextension enable hide_code --py --sys-prefix
+RUN jupyter nbextension enable rise --py --sys-prefix && \
+    jupyter nbextension enable calico-spell-check --sys-prefix && \
+    jupyter nbextension enable hide_code --py --sys-prefix && \
+    jupyter serverextension enable hide_code --py --sys-prefix && \
+    jupyter nbextension enable toc
 
 WORKDIR /home/zju/work

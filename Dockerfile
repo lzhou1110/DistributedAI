@@ -6,7 +6,8 @@ RUN apt-get update -q && \
     apt-get install -qy \
     texlive-xetex \
     imagemagick \
-    wkhtmltopdf
+    wkhtmltopdf \
+    curl
 
 RUN jupyter-nbextension install https://bitbucket.org/ipre/calico/downloads/calico-spell-check-1.0.zip
 

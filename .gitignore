@@ -1,3 +1,6 @@
 .idea
 .ipynb_checkpoints/
 notebooks/MNIST_data/
+notebooks/Python/MNIST/
+notebooks/Python/CNNwithFL/data/mnist/
+notebooks/Python/CNNwithFL/layers/__pycache__/*.pyc

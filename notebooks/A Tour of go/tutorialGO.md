@@ -485,4 +485,323 @@ func main() {
 	fmt.Println(Sqrt(2))
 }
 ```
+### switch
+`switch` 是编写一连串 `if - else` 语句的简便方法。它运行第一个值等于条件表达式的 case 语句。
+GO的switch语句类似于 `C、C++、Java、JavaScript 和 PHP` 中的，不过 Go 只运行选定的 case，而非之后所有的 case。 实际上，Go 自动提供了在这些语言中每个 case 后面所需的 `break` 语句。 除非以 `fallthrough` 语句结束，否则分支会自动终止。 
+Go 的另一点**重要的不同在于 switch 的 case 无需为常量，且取值不必为整数。**
+
+```go
+package main
+import (
+	"fmt"
+	"runtime"
+)
+func main() {
+	fmt.Print("Go runs on: ")
+	switch os := runtime.GOOS; os {
+	case "darwin":
+		fmt.Println("OS X.")
+	case "runtime":
+		fmt.Println("Linux.")
+	default:
+		// freebsd, openbsd,
+		// plan9, windows...
+		fmt.Printf("%s.", os)
+	}
+}
+```
+### switch 的求值顺序
+switch 的 case 语句从上到下顺次执行，直到匹配成功时停止。
+
+```go
+switch i {
+case 0:
+case f():
+}
+```
+在 i==0 时 f 不会被调用。）
+*注意：* Go 练习场中的时间总是从 2009-11-10 23:00:00 UTC 开始，该值的意义留给读者去发现。
+
+```go
+package main
+import (
+	"fmt"
+	"time"
+)
+func main() {
+	fmt.Println("When's Saturday?")
+	today := time.Now().Weekday()
+	switch time.Saturday {
+	case today + 0 :
+		fmt.Println("Today")
+	case today + 1 :
+		fmt.Println("Tomorrow")
+	case today + 2 :
+		fmt.Println("In two days")
+	default:
+		fmt.Println("too far away")
+	}
+}
+```
+### 没有条件的 switch
+没有条件的 switch 同 `switch true` 一样。
+这种形式能将一长串 `if-then-else` 写得更加清晰。
+
+```go
+package main
+import (
+	"time"
+	"fmt"
+)
+func main() {
+	t := time.Now()
+	switch {
+	case t.Hour() < 12:
+		fmt.Println("Good morning")
+	case t.Hour() < 18:
+		fmt.Println("Good afternoon")
+	case t.Hour() < 24:
+		fmt.Println("Good night")
+	default:
+		fmt.Println("Good day")
+	}
+}
+```
+### defer
+defer 语句会将函数推迟到外层函数返回之后执行。
+推迟调用的函数其参数会立即求值，但**直到外层函数返回前该函数都不会被调用**。
+
+```go
+package main
+import (
+	"fmt"
+)
+func main() {
+	defer fmt.Println("hello defer")//相对main函数
+	fmt.Println("world")
+}
+```
+### defer 栈
+推迟的函数调用会被压入一个栈中。当外层函数返回时，被推迟的函数会按照后进先出的顺序调用。
+
+```go
+package main
+import (
+	"fmt"
+)
+func main() {
+	fmt.Println("counting")
+	for i := 0; i < 10; i++ {
+		defer fmt.Println(i)
+	}
+	fmt.Println("done")
+}
+```
+## 更多类型 struct, slice and 映射
+### 指针
+Go 拥有指针。指针保存了值的内存地址(指针就是一个指向地址的数据)。
+
+1. 类型 `*T` 是指向 `T` 类型值的指针。其零值为 `nil`。
+`var p *int`
+2. `&` 操作符会生成一个指向其操作数的**指针**(`&`取地址值)。
+
+```go
+i :=42
+p = &i
+```
+3. `*` 操作符表示指针指向的**底层值**(`*`取内容值)。
+
+```go
+fmt.Println(*p)// 通过指针 p 读取 i
+*p = 21         // 通过指针 p 设置 i
+```
+这也就是通常所说的“间接引用”或“重定向”。
+与 C 不同，Go 没有指针运算。
+
+```go
+package main
+import (
+	"fmt"
+)
+func main() {
+	i, j := 42, 2701
+	p := &i			// point p to i
+	// p is address, read i through the pointer
+	fmt.Printf("address: %v value: %v\n", p, *p) 
+	*p = 31		// set i through the pointer
+	fmt.Println(i)
+	
+	p = &j // point to j
+	*p = *p /37		// divide j through the poniter
+	fmt.Println(j)
+}
+```
+### 结构体
+一个结构体（struct）就是一个 字段的集合。
+
+```go
+package main
+import (
+	"fmt"
+)
+type Vertex struct {
+	X int
+	Y int
+}
+func main() {
+	fmt.Println(Vertex{1, 2})
+}
+```
+### 结构体字段
+结构体字段使用点号来访问。 
+
+```go
+package main
+import (
+	"fmt"
+)
+type Vertex struct {
+	X int
+	Y int
+}
+func main() {
+	v := Vertex{1, 2}
+	v.X = 3
+	fmt.Println(v)
+}
+```
+### 结构体指针
+1. 结构体字段可以通过**结构体指针**来访问。
+2. 如果我们有一个指向结构体的指针 p，那么可以通过 `(*p).X` 来访问其字段 X。不过这么写太啰嗦了，所以语言也允许我们使用**隐式间接引用**，直接写 p.X 就可以。
+
+```go
+package main
+import (
+	"fmt"
+)
+type Vertex struct {
+	X int
+	Y int
+}
+func main() {
+	v := Vertex{1, 2}
+	p := &v
+	// (*p).X = 4
+	// fmt.Println(*p)
+	p.X = 3e3
+	fmt.Println(*p)
+}
+```
+### 结构体文法
+1. 结构体文法通过直接列出字段的值来新分配一个结构体。
+2. 使用 `Name:` 语法可以仅列出部分字段。（字段名的顺序无关。）
+3. 特殊的前缀 `&` 返回一个指向结构体的指针。
+
+```go
+package main
+import (
+	"fmt"
+)
+type Vertex struct {
+	X, Y int
+}
+var (
+	v1 = Vertex{1, 2}	// has type Vertex
+	v2 = Vertex{X: 1}	// Y: 0 is implicit
+	v3 = Vertex{}		// X: 0 and Y: 0
+	p = &Vertex{1, 2}	// has type *Vertex
+)
+func main() {
+	var pointer *int
+	fmt.Println(pointer)
+	fmt.Println(v1, v2, v3, p)
+	fmt.Printf("address: %v value: %v", p, *p)
+}
+```
+
+### 数组
+类型 `[n]T` 表示拥有 `n 个 T` 类型的值 的数组。
+表达式 会将变量 `a` 声明为拥有有 `10` 个整数的数组。
+
+```go
+var a [10]int
+```
+数组的长度是其类型的一部分，因此数组不能改变大小。这看起来是个限制，不过没关系，Go 提供了更加便利的方式来使用数组。
+
+```go
+// array 
+package main
+import (
+	"fmt"
+)
+func main() {
+	var a [2]string	// define one array with 2 strings
+	a[0] = "hello"
+	a[1] = "world"
+	fmt.Println(a[0], a[1])
+	fmt.Println(a)
+	
+	primes := [6]int{2, 3, 5, 7, 9, 11}
+	fmt.Println(primes)
+}
+```
+
+### 切片(slices)
+每个数组的大小都是固定的。而切片则为数组元素提供动态大小的、灵活的视角。在实践中，切片比数组更常用。
+类型`[]T`表示一个元素类型为`T`的切片
+切片通过两个下标来界定，即一个上界和一个下界，二者以冒号分隔:
+`a[low : high] 即 var s []int = primes[1 : 4]`
+他会选择一个半开区间，左闭右开(美国人的习惯)
+以下表达式创建了一个切片，包含了a中下标从1到3的元素:
+`a[1:3]`
+
+```go
+//slices
+package main
+import (
+	"fmt"
+)
+func main() {
+	// var primes [6]int = [6]int{2, 3, 5, 7, 11, 13}
+	// fmt.Println(primes)
+	primes := [6]int{2, 3, 5, 7, 11, 13}
+	var s []int = primes[1 : 4]
+	fmt.Println(s)
+}
+```
+
+### 切片就像数组的引用(slices are like references to arrays)
+切片**并不存储任何数据**，它只是描述了底层数组中的一段(引用)。更改切片的元素会修改其底层数组中对应的元素。与它共享底层数组的切片都会观测到这些修改。
+
+```go
+// slices are like references to arrays
+package main
+import (
+	"fmt"
+)
+func main() {
+	// var names [4]string = [4]string{}
+	names := [4]string{
+		"John",
+		"Paul",
+		"George",
+		"Ringo",
+	}
+	fmt.Println(names)
+	a := names[0 : 2]
+	b := names[1 : 3]
+	fmt.Println(a, b)
+	b[0] = "XXXX"
+	fmt.Println(a, b)
+	fmt.Println(names)
+}
+```
+### 切片文法(slices literals)
+切片文法类似于没有长度的数组文法。
+这是一个数组文法：
+`[3]bool{true, true, false}`
+下面这样则会创建一个和上面相同的数组，然后构建一个引用了它的切片：
+`[]bool{true, true, false}`
+
+
 

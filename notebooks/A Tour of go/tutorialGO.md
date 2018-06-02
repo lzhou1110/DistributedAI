@@ -803,5 +803,79 @@ func main() {
 下面这样则会创建一个和上面相同的数组，然后构建一个引用了它的切片：
 `[]bool{true, true, false}`
 
+```go
+// slices literals
+package main
+import (
+	"fmt"
+)
+func main() {
+	// create array
+	var array [4]int = [4]int{1, 2, 3, 4}
+	fmt.Printf("value: %v, Type: %T\n", array, array)
+	array2 := [4]bool{false, true, false, true}
+	fmt.Printf("value: %v Type: %T\n", array2, array2)
+	// create slices
+	var q []int = []int{3, 4, 6, 7}
+	fmt.Printf("value: %v Type:%T\n", q, q)
+	q2 := []bool{true, false, true, true, false}
+	fmt.Printf("value: %v Type: %T\n", q2, q2)
+	// create slices with struct
+	var s1 []struct{
+		i int
+		b bool
+	} = []struct {
+		i int
+		b bool
+	}{
+		{2, false},
+		{3, true},
+		{1, true},
+		{6, false},
+	}
+	fmt.Printf("value:%v Type: %T\n", s1, s1)
+	s := []struct{
+		i int
+		b bool
+	}{
+		{1, true},
+		{3, false},
+		{5, false},
+	}
+	fmt.Printf("value:%v Type: %T\n", s, s)
+}
+```
+### 切片的默认行为
+在进行切片时，你可以利用它的默认行为来忽略上下界。切片下界的默认值为 0，上界则是该切片的长度。
+对于数组
+`var a [10]int`
+来说，以下切片是等价的：
+
+```go
+a[0:10]
+a[:10]
+a[0:]
+a[:]
+```
+
+```go
+// slices defaults
+package main
+import (
+	"fmt"
+)
+func main() {
+	s := []int{2, 3, 4, 6, 8}
+	s1 := s[1:4] 
+	fmt.Println(s, s1)
+	s2 := s[:2]
+	fmt.Println(s, s2)
+	s2[0] = 100
+	// slices are like references to array
+	fmt.Println(s, s1)
+	fmt.Println(s, s2)
+}
+```
+
 
 

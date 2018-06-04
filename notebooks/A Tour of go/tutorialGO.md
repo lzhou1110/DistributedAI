@@ -881,33 +881,82 @@ func main() {
 切片拥有 **长度** 和 **容量**。
 切片的长度就是它所包含的元素个数。
 切片的容量是从它的第一个元素开始数，到其底层数组元素末尾的个数。
-切片 s 的长度和容量可通过表达式 `len(s)` 和 `cap(s)` 来获取。
+切片 s 的长度和容量可通过表达式 `len(s)` 和 `cap(s)` 来获取。 len()获取的切片的得到的长度，cap是指员原来数组苏勇的长度。
 你可以通过重新切片来扩展一个切片，给它提供足够的容量。试着修改示例程序中的切片操作，向外扩展它的容量，看看会发生什么。
 
 ```go
+// silce go 
 package main
 import (
-    "fmt"
+	"fmt"
 )
-func main() {
-	s := []int{2, 3, 5, 7, 11, 13}
-	printSlice(s)
-
-	// Slice the slice to give it zero length.
-	s = s[:0]
-	printSlice(s)
-
-	// Extend its length.
-	s = s[:4]
-	printSlice(s)
-
-	// Drop its first two values.
-	s = s[2:]
-	printSlice(s)
-}
 func printSlice(s []int) {
 	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
 }
+func main() {
+	s := []int{2, 3, 5, 7, 11, 13}
+	printSlice(s)
+	// Slice the slice to give it zero length
+	s = s[:0]
+	printSlice(s)
+	// Extend its length
+	s = s[:4]
+	printSlice(s)
+	// Drop its first two values
+	s = s[:2]
+	printSlice(s)
+}
+```
+### nil切片
+切片的的零值是nil
+nil切片的长度和容量为0切没有底层数组。
+
+```go
+// nil slices
+package main
+import (
+	"fmt"
+)
+func main() {
+	var s []int
+	// s := []int
+	fmt.Println(s, len(s), cap(s))
+	if s == nil {
+		fmt.Println("nil")
+	}	
+}
+```
+### 用 make 创建切片
+切片可以用内建函数 `make` 来创建，这也是你创建动态数组的方式。
+`make` 函数会分配一个**元素为零值**的数组并**返回一个引用了它的切片**：
+`a := make([]int, 5)  // len(a)=5`
+要指定它的容量，需向 make 传入第三个参数：
+
+```go
+b := make([]int, 0, 5) // len(b)=0, cap(b)=5
+b = b[:cap(b)] // len(b)=5, cap(b)=5
+b = b[1:]      // len(b)=4, cap(b)=4
 ```
 
+```go
+package main
+import "fmt"
+func main() {
+	a := make([]int, 5)
+	printSlice("a", a)
+
+	b := make([]int, 0, 5)
+	printSlice("b", b)
+
+	c := b[:2]
+	printSlice("c", c)
+
+	d := c[2:5]
+	printSlice("d", d)
+}
+func printSlice(s string, x []int) {
+	fmt.Printf("%s len=%d cap=%d %v\n",
+		s, len(x), cap(x), x)
+}
+```
 

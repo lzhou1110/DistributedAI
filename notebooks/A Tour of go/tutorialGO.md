@@ -722,6 +722,7 @@ func main() {
 ### 数组
 类型 `[n]T` 表示拥有 `n 个 T` 类型的值 的数组。
 表达式 会将变量 `a` 声明为拥有有 `10` 个整数的数组。
+将数组看作一个特殊的struct，结构的字段名对应数组的索引，同时成员的数目固定
 
 ```go
 var a [10]int
@@ -918,12 +919,13 @@ import (
 	"fmt"
 )
 func main() {
+	// var s = []int //error []int is not expression
+	// var s []int = []int{1, 2, 3} <==> s := []int{1, 2, 3}
 	var s []int
-	// s := []int
 	fmt.Println(s, len(s), cap(s))
 	if s == nil {
 		fmt.Println("nil")
-	}	
+	}
 }
 ```
 ### 用 make 创建切片
@@ -939,55 +941,150 @@ b = b[1:]      // len(b)=4, cap(b)=4
 ```
 
 ```go
+// use make to create slices
 package main
-import "fmt"
-func main() {
-	a := make([]int, 5)
-	printSlice("a", a)
-
-	b := make([]int, 0, 5)
-	printSlice("b", b)
-
-	c := b[:2]
-	printSlice("c", c)
-
-	d := c[2:5]
-	printSlice("d", d)
-}
+import (
+	"fmt"
+)
 func printSlice(s string, x []int) {
-	fmt.Printf("%s len=%d cap=%d %v\n",
-		s, len(x), cap(x), x)
+	fmt.Printf("%s len=%d cap=%d value=%v type=%T\n", s, len(x), cap(x), x, x)
+}
+func main() {
+	// x := [3]string{"Лайка", "Белка", "Стрелка"}
+	// s := x[:] // a slice referencing the storage of x
+	// 创建 一个元素值为0的数组并返回一个引用了它的切片
+	a := make([]int, 5) // len(a) = 5 cap(a) = 5
+	printSlice("a", a)
+	// 创建 一个指定容量， 需要向make传入第三个参数
+	// b := make([]int, 3, 5)	// len(b)=3, cap(b)=5
+	b := make([]int, 0, 5)	// len(b)=0, cap(b)=5
+	printSlice("b", b) 	// b len=0 cap=5 value=[] type=[]int
+	c := b[:3]
+	printSlice("c", c)	// c len=3 cap=5 value=[0 0 0] type=[]int
+	d := c[2:5]
+	printSlice("d", d) // d len=3 cap=3 value=[0 0 0] type=[]int
 }
 ```
+[Note]一个切片是一个数组片段的描述。它包含了指向数组的指针，片段的长度， 和容量（片段的最大长度）。前面使用 `make([]byte, 5)` 创建的切片变量 s ,其中`[]int`指向数组指针；长度是切片引用的元素数目。容量是底层数组的元素数目（从切片指针开始）。 [reference](https://blog.go-zh.org/go-slices-usage-and-internals)
 ### 切片的切片
 切片可包含任何类型，甚至包括其它的切片。
 
 ```go
+// slices of slices
 package main
-
 import (
 	"fmt"
 	"strings"
 )
-
 func main() {
-	// Create a tic-tac-toe board.
+	// Create a tic-tac-toe board
 	board := [][]string{
 		[]string{"_", "_", "_"},
 		[]string{"_", "_", "_"},
 		[]string{"_", "_", "_"},
 	}
-
-	// The players take turns.
+	// The players takes turns
 	board[0][0] = "X"
 	board[2][2] = "O"
 	board[1][2] = "X"
 	board[1][0] = "O"
 	board[0][2] = "X"
-
 	for i := 0; i < len(board); i++ {
 		fmt.Printf("%s\n", strings.Join(board[i], " "))
 	}
+}
+```
+### 向切片追加元素
+为切片追加新的元素是种常用的操作，为此 Go 提供了内建的 `append` 函数。内建函数的文档对此函数有详细的介绍。
+`func append(s []T, vs ...T) []T`
+append 的第一个参数 `s` 是一个元素类型为 `T` 的切片，其余类型为 T 的值将会追加到该切片的末尾。
+append 的结果是一个包含原切片所有元素加上新添加元素的切片。
+当 s 的底层数组太小，不足以容纳所有给定的值时，它就会分配一个更大的数组。返回的切片会指向这个新分配的数组。
+
+```go
+// append
+package main
+import (
+	"fmt"
+)
+func printSlice(s []int) {
+	fmt.Printf("len=%d cap=%d value=%v type=%T\n", len(s), cap(s), s, s)
+}
+func main() {
+	var s []int
+	printSlice(s)
+	// append works on nil slices
+	s = append(s, 0)
+	printSlice(s)
+	// The slice grows as needed
+	s = append(s, 1)
+	printSlice(s)
+	// we can add more than one element at a time
+	s = append(s, 2, 3, 5)
+	printSlice(s)
+}
+```
+### Range
+`for` 循环的 `range` 形式可遍历切片或映射。
+当使用 `for` 循环遍历切片时，每次迭代都会返回两个值。第一个值为当前元素的下标，第二个值为该下标所对应元素的一份副本。
+
+```go
+// Range
+package main
+import (
+	"fmt"
+)
+var pow = []int{1, 2, 4, 8, 16, 32, 64, 128}
+func main() {
+	for i, v := range pow {
+		fmt.Printf("2**%d = %d\n", i, v)
+	}
+}
+```
+可以将下标或值赋予 `_` 来忽略它。
+若你只需要索引，去掉 `, value` 的部分即可。
+
+```go
+package main
+import(
+	"fmt"
+)
+func main() {
+	pow := make([]int, 10)
+	for i := range pow {
+		pow[i] = 1 << uint(i) // ==2**i
+	}
+	for _, value := range pow {
+		fmt.Printf("%d\n", value)
+	}
+}
+```
+### 练习：切片
+实现 `Pic`。它应当返回一个长度为 `dy` 的切片，其中每个元素是一个长度为 dx，元素类型为 `uint8` 的切片。当你运行此程序时，它会将每个整数解释为灰度值（好吧，其实是蓝度值）并显示它所对应的图像。
+
+图像的选择由你来定。几个有趣的函数包括 `(x+y)/2, x*y, x^y, x*log(y)` 和 `x%(y+1)`。
+
+（提示：需要使用循环来分配 `[][]uint8` 中的每个 `[]uint8`；请使用 `uint8(intValue)` 在类型之间转换；你可能会用到 `math` 包中的函数。）
+
+```go
+package main
+
+import "golang.org/x/tour/pic"
+import "fmt"
+
+func Pic(dx, dy int) [][]uint8 {
+	var rgb [][]uint8
+	fmt.Println(dx, dy)
+	for i := 0; i<dy; i++ {
+		for j:=0; j <dx; j++ {
+			rgb[i][j] = uint8((i+j)/2)
+		}
+	}
+	return rgb
+}
+
+func main() {
+	pic.Show(Pic)
 }
 ```
 

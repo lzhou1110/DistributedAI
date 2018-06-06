@@ -1087,5 +1087,82 @@ func main() {
 	pic.Show(Pic)
 }
 ```
+### 映射(map)
+映射将key映射到value。
+映射的零值为 `nil` 。`nil` 映射既没有键，也不能添加键。
+`make`函数会返回给定类型的映射(map)，并将其初始化备用。
+`map type is type: map[string]main.Vertex`
 
+```go
+// map
+package main
+import (
+	"fmt"
+)
+type Vertex struct {
+	Lat, Long float64
+}
+// initialize map
+var m map[string]Vertex
+func main() {
+	m = make(map[string]Vertex)
+	m["Bell Labs"] = Vertex{
+		// 40.22234, -74.33113 // error
+		40.22234, -74.33113,
+	}
+	fmt.Printf("value: %v type: %T\n",m, m)
+	fmt.Println(m["Bell Labs"])
+}
+```
+### map的文法(写法)
+映射的文法与结构体相似，不过必须有键名。
+
+```go
+// map literals
+package main
+import (
+	"fmt"
+)
+type Vertex struct {
+	Lat, Long float64
+}
+// var s []int
+var s = []int{1, 2, 3}
+// map 类型 map[string]Vertex
+var m = map[string]Vertex{
+	"Bell Labs": Vertex{
+		40.441245, -68.421167889,
+	},
+	"Google": Vertex{
+		37.3425, -124.341,
+	},
+}
+func main() {
+	fmt.Println(m)
+}
+```
+若顶级类型只是一个类型名，你可以在文法的元素中省略它。
+
+```go
+package main
+import (
+	"fmt"
+)
+type Vertex struct {
+	Lat, Long float64
+}
+var m = map[string]Vertex{
+	// "Bell Labs": Vertex{
+	// 	30.4422, -44.44212,
+	// },
+	// "Google": Vertex {
+	// 	39.442, -55.224,
+	// },
+	"Bell": {-22.3444, 33.312},
+	"Google":{-33.442, 33.51},
+}
+func main() {
+	fmt.Println(m)
+}
+```
 

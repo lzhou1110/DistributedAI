@@ -1166,3 +1166,33 @@ func main() {
 }
 ```
 
+### 修改映射(map)
+
+在` map m`中插入或者修改元素：
+
+`m[key] = elem`
+
+获取元素:
+
+`elem = m[key]`
+
+删除元素:
+
+`delete(m, key)`
+
+通过双赋值检测某个键是否存在:
+
+`elem, ok = m[key]`
+
+若key在m中，ok为true；否则, ok为false.
+
+若key不在map中，那么elems是该map的零值。
+
+同样的, 当从映射中读取某个不存在的键时，结果是映射的元素类型的零值。
+
+**注**: 若elem或者ok还未声明，你可以使用短变量声明:
+
+` elem, ok := m[key]`
+
+
+

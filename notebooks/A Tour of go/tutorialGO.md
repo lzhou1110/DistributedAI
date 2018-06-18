@@ -1,7 +1,7 @@
 # 基础
 ## 包，变量和函数
 ### 包
-每个 Go 程序都是由包构成的。
+每个 Go 程序都是由**包**构成的。
 程序从`main`包开始运行。
 
 本程序通过导入路径`"fmt"`和`"math/rand"`来使用这两个包。
@@ -32,6 +32,18 @@ import "math"
 在导入一个包时，你只能引用其中已导出的名字。任何“未导出”的名字在该包外均无法访问。
 
 执行代码，观察错误输出。
+
+```go
+package main
+import (
+	"fmt"
+	"math"
+)
+func main() {
+	// fmt.Println(math.pi); // math.pi undefined 
+    fmt.Printlin(math.Pi)
+}
+```
 
 ### 函数
 函数可以没有参数或接受多个参数。
@@ -72,6 +84,9 @@ a: array[3] of int
 ```GO
 var a []int
 x = a[1]
+var p *int
+value := *p
+pointer := &value
 ```
 ### 多值返回
 函数可以返回任意数量的返回值。
@@ -83,7 +98,7 @@ func swap(a, b string) (string, string){
     return b, a
 }
 func main(){
-    a, b := swap("hello", "world")
+    a, b := swap("hello", "world") // '' 与 ""不同
     fmt.Println("a, b:", a, b)
 }
 ```
@@ -112,14 +127,14 @@ func main() {
 
 ```go
 package main
-
-import "fmt"
-
-var c, python, java bool
-
+import (
+	"fmt"
+)
+var c, python, java bool;
+var i int;
+// var x float32, y int16;   syntax error
 func main() {
-	var i int
-	fmt.Println(i, c, python, java)
+	fmt.Println(i, c, python, java);
 }
 ```
 ### 变量的初始化
@@ -152,6 +167,11 @@ func main() {
 	fmt.Println(i, j, k, c, python, java)
 }
 ```
+总结： **声明变量**必须只用两种
+
+- 使用`var`申明列表, 如`var x, y = 1, "dd";`;
+- 而`:=`可以代替`var` 做简洁申明并且必须进行初始化， `python, java := "ss", 2;`
+
 ### 基本类型
 GO的基本类型
 
@@ -185,14 +205,14 @@ var (
 var i, j float32 = 1, 2
 var a, b, x, y = 1, 2, true, false // var 申明一个变量列表(类型可省略)
 func main() {
-	k, w := 1, 2
-	fmt.Println(k, w)
+	k, w := 1, 2;
+	fmt.Println(k, w);
 	// fmt.Println 打印字符串并换行,fmt.Printf获取变量输出(推荐使用)
-	// fmt.Println("Type: %T Value: %v\n", ToBe, ToBe)
-	// fmt.Println("Type: %T value: %v\n", MaxInt, MaxInt)
-	fmt.Printf("Type %T value: %v\n", ToBe, ToBe)
-	fmt.Printf("Type: %T value: %v\n", MaxInt, MaxInt)
-	fmt.Printf("Type: %T value: %v\n", z, z)
+	// fmt.Println("Type: %T Value: %v\n", ToBe, ToBe);
+	// fmt.Println("Type: %T value: %v\n", MaxInt, MaxInt);
+	fmt.Printf("Type %T value: %v\n", ToBe, ToBe);
+	fmt.Printf("Type: %T value: %v\n", MaxInt, MaxInt);
+	fmt.Printf("Type: %T value: %v\n", z, z);
 }
 ```
 ### 零值
@@ -207,7 +227,7 @@ func main() {
 	var f float64
 	var b bool
 	var s string
-	fmt.Printf("%v %v %v %q\n", i, f, b, s)
+	fmt.Printf("%v %v %q %q\n", i, f, b, s)// %v 打印值；%T 打印类型，%q 打印全部信息
 }
 ```
 ### 类型转换
@@ -286,7 +306,7 @@ func main() {
 一个未指定类型的常量由上下文来决定其类型。
 `int`类型最大可以存储一个 64 位的整数，有时会更小。
 
-```
+```go
 package main
 import (
 	"fmt"

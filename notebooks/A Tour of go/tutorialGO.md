@@ -507,7 +507,7 @@ func main() {
 ```
 ### switch
 `switch` 是编写一连串 `if - else` 语句的简便方法。它运行第一个值等于条件表达式的 case 语句。
-GO的switch语句类似于 `C、C++、Java、JavaScript 和 PHP` 中的，不过 Go 只运行选定的 case，而非之后所有的 case。 实际上，Go 自动提供了在这些语言中每个 case 后面所需的 `break` 语句。 除非以 `fallthrough` 语句结束，否则分支会自动终止。 
+GO的switch语句类似于 `C、C++、Java、JavaScript 和 PHP` 中的，不过 **Go 只运行选定的 case**，而非之后所有的 case。 实际上，Go 自动提供了在这些语言中每个 case 后面所需的 `break` 语句。 除非以 `fallthrough` 语句结束，否则分支会自动终止。 
 Go 的另一点**重要的不同在于 switch 的 case 无需为常量，且取值不必为整数。**
 
 ```go
@@ -543,23 +543,26 @@ case f():
 *注意：* Go 练习场中的时间总是从 2009-11-10 23:00:00 UTC 开始，该值的意义留给读者去发现。
 
 ```go
-package main
+package main 
 import (
 	"fmt"
 	"time"
 )
 func main() {
-	fmt.Println("When's Saturday?")
-	today := time.Now().Weekday()
+	fmt .Println("when is Saturday?");
+	today := time.Now().Weekday();
+	// fmt.Println(today);
+	// fmt.Printf("%v %T\n", today, today);
+	// fmt.Printf("%v %T\n", time.Now(), time.Now());
 	switch time.Saturday {
-	case today + 0 :
-		fmt.Println("Today")
-	case today + 1 :
-		fmt.Println("Tomorrow")
-	case today + 2 :
-		fmt.Println("In two days")
-	default:
-		fmt.Println("too far away")
+		case today + 0 :
+			fmt.Println("Today");
+		case today + 1 :
+			fmt.Println("Tomorrow");
+		case today + 2 :
+			fmt.Println("in two days");
+		default:
+			fmt.Println("too far away");
 	}
 }
 ```
@@ -619,7 +622,8 @@ func main() {
 ```
 ## 更多类型 struct, slice and 映射
 ### 指针
-Go 拥有指针。指针保存了值的内存地址(指针就是一个指向地址的数据)。
+Go 拥有指针。指针保存了值的内存地址(指针就是一个指向地址的数据)。**在go中获得该变量的内存地址 用&a, 别名而已，并没有占用内存空间。实际上他们是同一个东西，在内存中占用同样的一个存储单元。**
+**go中所有的都是按值传递，对于复杂类型，传的是指针的拷贝**
 
 1. 类型 `*T` 是指向 `T` 类型值的指针。其零值为 `nil`。
 `var p *int`
@@ -634,6 +638,22 @@ p = &i
 ```go
 fmt.Println(*p)// 通过指针 p 读取 i
 *p = 21         // 通过指针 p 设置 i
+// example
+package main 
+import (
+	"fmt"
+)
+func main() {
+	i := 43;
+	// p := &i;
+	var p *int = &i;
+	j := *p;
+	j = 1;
+	*p = 3;
+	fmt.Printf("value: %v type: %T\n", i, i);
+	fmt.Printf("value: %v type: %T\n", p, p);
+	fmt.Printf("value: %v type: %T\n", j, j);	
+}
 ```
 这也就是通常所说的“间接引用”或“重定向”。
 与 C 不同，Go 没有指针运算。
@@ -644,17 +664,56 @@ import (
 	"fmt"
 )
 func main() {
-	i, j := 42, 2701
-	p := &i			// point p to i
-	// p is address, read i through the pointer
-	fmt.Printf("address: %v value: %v\n", p, *p) 
-	*p = 31		// set i through the pointer
-	fmt.Println(i)
+	// i, j := 43, 8782;
+	// // var p *int = &i;
+	// p := &i; // pointer p to i
+	// fmt.Printf("address: %v value: %v\n", p, *p);
+	// fmt.Printf("%p\n", &j)
 	
-	p = &j // point to j
-	*p = *p /37		// divide j through the poniter
-	fmt.Println(j)
+	// Learnin pointer
+	var m map[int]string = map[int]string {
+		0: "00",
+		1: "11",
+	};
+	mm := m; //deep copy m value to mm 
+	fmt.Printf("m value: %v address: %p\n",m, &m);
+	fmt.Printf("mm value: %v address: %p\n", mm, &mm);
+	// fmt.Printf("m value: %v address: %v\n",m, &m);
+	// fmt.Printf("mm value: %v address: %v\n", mm, &mm);
+	
+	// changeMap(m); //(1) go中所有的都是按值传递，对于复杂类型，传的是指针的拷贝``
+	changeMap(&m); // (2) 直接传指针 也是传指针的拷贝
+	fmt.Printf("m value: %v address: %p\n",m, &m);
+	fmt.Printf("mm value: %v address: %p\n", mm, &mm);
+
+	// （3）
+	// 形参 和 实参
+	// param := 3;
+	// fmt.Printf("param value: %v address: %p\n",param, &param);
+	// changeParam(param);
+	// fmt.Printf("param value: %v address: %p\n",param, &param);
 }
+// (1)
+// func changeMap(mmm map[int]string) {
+// 	mmm[1] = "eeee";
+// 	fmt.Printf("changeMap func value: %v address: %p\n", mmm, &mmm);
+// }
+
+// (2)
+func changeMap(mmmm *map[int]string) {
+	// temp := *mmmm;
+	// temp[0] = "啛啛喳喳";
+	// fmt.Printf("func changeMap value: %v address: %p\n", temp, &temp);
+	mmmm = nil;
+	// *mmmm = nil;
+	fmt.Printf("func changeMap value: %v address: %p\n", mmmm, &mmmm);
+}
+
+// (3)
+// func changeParam(x int) {
+// 	x = 2222;
+// 	fmt.Printf("func changeParam value: %v address: %p\n", x, &x);
+// }
 ```
 ### 结构体
 一个结构体（struct）就是一个 字段的集合。

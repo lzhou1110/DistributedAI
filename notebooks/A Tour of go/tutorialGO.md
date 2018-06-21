@@ -777,24 +777,26 @@ func main() {
 3. 特殊的前缀 `&` 返回一个指向结构体的指针。
 
 ```go
-package main
+package main 
 import (
 	"fmt"
 )
-type Vertex struct {
+type Vertex  struct {
 	X, Y int
 }
 var (
-	v1 = Vertex{1, 2}	// has type Vertex
-	v2 = Vertex{X: 1}	// Y: 0 is implicit
-	v3 = Vertex{}		// X: 0 and Y: 0
-	p = &Vertex{1, 2}	// has type *Vertex
+	v1 = Vertex{1, 2}; // has type Vertex
+	v2 = Vertex{X: 1}; // Y: 0 is implicit
+	v3 = Vertex{};		// X:0 Y:0
+	// p = &Vertex{1, 2} // has type *Vertex
+	p = &v1;
 )
 func main() {
-	var pointer *int
-	fmt.Println(pointer)
-	fmt.Println(v1, v2, v3, p)
-	fmt.Printf("address: %v value: %v", p, *p)
+	var pointer *int;
+	fmt.Println(pointer);
+	fmt.Println(v1, v2, v3, p);
+	fmt.Printf("v1 address: %p value: %v\n", &v1, v1);
+	fmt.Printf("p address: %p value: %v\n", p, *p); // 指针为同一个地址
 }
 ```
 
@@ -809,20 +811,24 @@ var a [10]int
 数组的长度是其类型的一部分，因此数组不能改变大小。这看起来是个限制，不过没关系，Go 提供了更加便利的方式来使用数组。
 
 ```go
-// array 
-package main
+// array
+package main 
 import (
 	"fmt"
 )
 func main() {
-	var a [2]string	// define one array with 2 strings
-	a[0] = "hello"
-	a[1] = "world"
-	fmt.Println(a[0], a[1])
-	fmt.Println(a)
-	
-	primes := [6]int{2, 3, 5, 7, 9, 11}
-	fmt.Println(primes)
+	var a [2]string; 
+	a[0] = "hellp";
+	a[1] = "ekedd";
+	fmt.Println(a);
+	fmt.Println(a[0], a[1]);
+	primes := [6]int{2, 3, 5, 7, 9, 11};
+	fmt.Println(primes);
+	var m map[int]string = map[int]string {
+		1: "www0",
+		2: "sss",
+	};
+	fmt.Println(m);
 }
 ```
 
@@ -960,31 +966,35 @@ func main() {
 ### 切片的长度与容量
 切片拥有 **长度** 和 **容量**。
 切片的长度就是它所包含的元素个数。
-切片的容量是从它的第一个元素开始数，到其底层数组元素末尾的个数。
-切片 s 的长度和容量可通过表达式 `len(s)` 和 `cap(s)` 来获取。 len()获取的切片的得到的长度，cap是指员原来数组苏勇的长度。
+**切片的容量**是从**切片后的第一个元素开始数，到其底层数组元素末尾的个数**。
+切片 s 的长度和容量可通过表达式 `len(s)` 和 `cap(s)` 来获取。 len()获取的切片的得到的长度，cap是指员原来数组的长度。
 你可以通过重新切片来扩展一个切片，给它提供足够的容量。试着修改示例程序中的切片操作，向外扩展它的容量，看看会发生什么。
 
 ```go
-// silce go 
-package main
+// slices go
+package main 
 import (
 	"fmt"
 )
-func printSlice(s []int) {
-	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
+func printSlices(s []int) {
+	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s);
 }
 func main() {
-	s := []int{2, 3, 5, 7, 11, 13}
-	printSlice(s)
-	// Slice the slice to give it zero length
-	s = s[:0]
-	printSlice(s)
-	// Extend its length
-	s = s[:4]
-	printSlice(s)
-	// Drop its first two values
-	s = s[:2]
-	printSlice(s)
+	s := []int{3, 4, 5,7, 8, 10};
+	printSlices(s);
+	// Slices the slice to give it zero length
+	s = s[:0];
+	printSlices(s);
+	// extend th length
+	s = s[:4];
+	printSlices(s);
+	// drop its first two values
+	s = s[:2];
+	printSlices(s); //len=2 cap=6 [3 4]
+	s = s[:6];
+	printSlices(s); //len=6 cap=6 [3 4 5 7 8 10]
+	s = s[3:4];
+	printSlices(s); //len=1 cap=3 [7]
 }
 ```
 ### nil切片
@@ -1036,12 +1046,12 @@ func main() {
 	printSlice("a", a)
 	// 创建 一个指定容量， 需要向make传入第三个参数
 	// b := make([]int, 3, 5)	// len(b)=3, cap(b)=5
-	b := make([]int, 0, 5)	// len(b)=0, cap(b)=5
-	printSlice("b", b) 	// b len=0 cap=5 value=[] type=[]int
-	c := b[:3]
-	printSlice("c", c)	// c len=3 cap=5 value=[0 0 0] type=[]int
-	d := c[2:5]
-	printSlice("d", d) // d len=3 cap=3 value=[0 0 0] type=[]int
+	b := make([]int, 0, 5);	// len(b)=0, cap(b)=5
+	printSlice("b", b); 	// b len=0 cap=5 value=[] type=[]int
+	c := b[:3];
+	printSlice("c", c);	// c len=3 cap=5 value=[0 0 0] type=[]int
+	d := c[2:5];
+	printSlice("d", d); // d len=3 cap=3 value=[0 0 0] type=[]int
 }
 ```
 [Note]一个切片是一个数组片段的描述。它包含了指向数组的指针，片段的长度， 和容量（片段的最大长度）。前面使用 `make([]byte, 5)` 创建的切片变量 s ,其中`[]int`指向数组指针；长度是切片引用的元素数目。容量是底层数组的元素数目（从切片指针开始）。 [reference](https://blog.go-zh.org/go-slices-usage-and-internals)
@@ -1050,26 +1060,26 @@ func main() {
 
 ```go
 // slices of slices
-package main
+package main 
 import (
 	"fmt"
 	"strings"
 )
 func main() {
-	// Create a tic-tac-toe board
-	board := [][]string{
+	// create a tic-tac-toe board
+	board := [][]string {
 		[]string{"_", "_", "_"},
 		[]string{"_", "_", "_"},
 		[]string{"_", "_", "_"},
-	}
-	// The players takes turns
-	board[0][0] = "X"
-	board[2][2] = "O"
-	board[1][2] = "X"
-	board[1][0] = "O"
-	board[0][2] = "X"
-	for i := 0; i < len(board); i++ {
-		fmt.Printf("%s\n", strings.Join(board[i], " "))
+	};
+	// 
+	board[0][0] = "X";
+	board[2][2] = "O";
+	board[1][2] = "X";
+	board[1][0] = "O";
+	board[0][2] = "X";
+	for i:=0; i < len(board); i++ {
+		fmt.Printf("%s\n", strings.Join(board[i], " "));
 	}
 }
 ```
@@ -1082,25 +1092,28 @@ append 的结果是一个包含原切片所有元素加上新添加元素的切�
 
 ```go
 // append
-package main
+package main 
 import (
 	"fmt"
 )
-func printSlice(s []int) {
-	fmt.Printf("len=%d cap=%d value=%v type=%T\n", len(s), cap(s), s, s)
+func printSlices(s []int) {
+	fmt.Printf("len=%d cap=%d value=%v type=%T\n", len(s), cap(s), s, s);
 }
 func main() {
-	var s []int
-	printSlice(s)
+	var s []int;
+	printSlices(s);
 	// append works on nil slices
-	s = append(s, 0)
-	printSlice(s)
-	// The slice grows as needed
-	s = append(s, 1)
-	printSlice(s)
-	// we can add more than one element at a time
-	s = append(s, 2, 3, 5)
-	printSlice(s)
+	s = append(s, 0);
+	printSlices(s);
+	// the slices grows as needed
+	s = append(s, 1);
+	printSlices(s);
+	// we can add more than one element at time
+	s = append(s, 2, 4, 5, 6);
+	printSlices(s);
+	// s1 := []int{7, 4, 2}; // 不是同一种类型
+	// s = append(s, s1);
+	// printSlices(s);
 }
 ```
 ### Range
@@ -1250,25 +1263,18 @@ func main() {
 在` map m`中插入或者修改元素：
 
 `m[key] = elem`
-
 获取元素:
 
 `elem = m[key]`
-
 删除元素:
 
 `delete(m, key)`
-
 通过双赋值检测某个键是否存在:
 
 `elem, ok = m[key]`
-
 若key在m中，ok为true；否则, ok为false.
-
-若key不在map中，那么elems是该map的零值。
-
-同样的, 当从映射中读取某个不存在的键时，结果是映射的元素类型的零值。
-
+若key不在map中，那么elem是该map的零值。
+即当从映射中读取某个不存在的键时，结果是映射的元素类型的零值。
 **注**: 若elem或者ok还未声明，你可以使用短变量声明:
 
 ` elem, ok := m[key]`

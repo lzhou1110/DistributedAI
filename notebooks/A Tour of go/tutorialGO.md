@@ -675,16 +675,29 @@ func main() {
 		0: "00",
 		1: "11",
 	};
-	mm := m; //deep copy m value to mm 
-	fmt.Printf("m value: %v address: %p\n",m, &m);
-	fmt.Printf("mm value: %v address: %p\n", mm, &mm);
+	mm := m; //deep copy m value to mm
+	var values = 4; // 如果是简单的类型，深拷贝
+	values2 := values;
+	fmt.Printf("values value: %v address:  %p\n", values, &values);
+	fmt.Printf("values2 value: %v address:  %p\n", values2, &values2); 
+
+	var mapLiu map[string]string = map[string]string {
+		"0": "www",
+		"1": "xxxx",
+	};
+	mapLiu2 := mapLiu; // 如果是复杂类型， 浅拷贝
+	fmt.Printf("mapLiu value: %v address:  %p\n", mapLiu, mapLiu);
+	fmt.Printf("mapLiu2 value: %v address:  %p\n", mapLiu2, mapLiu2); 
+
+	fmt.Printf("m value: %v address: %p\n",m, m);
+	fmt.Printf("mm value: %v address: %p\n", mm, mm);
 	// fmt.Printf("m value: %v address: %v\n",m, &m);
 	// fmt.Printf("mm value: %v address: %v\n", mm, &mm);
 	
-	// changeMap(m); //(1) go中所有的都是按值传递，对于复杂类型，传的是指针的拷贝``
-	changeMap(&m); // (2) 直接传指针 也是传指针的拷贝
-	fmt.Printf("m value: %v address: %p\n",m, &m);
-	fmt.Printf("mm value: %v address: %p\n", mm, &mm);
+	changeMap(m); //(1) go中所有的都是按值传递，对于复杂类型，传的是指针的拷贝``
+	// changeMap(&m); // (2) 直接传指针 也是传指针的拷贝
+	fmt.Printf("m value: %v address: %p\n",m, m);
+	fmt.Printf("mm value: %v address: %p\n", mm, mm);
 
 	// （3）
 	// 形参 和 实参
@@ -694,20 +707,20 @@ func main() {
 	// fmt.Printf("param value: %v address: %p\n",param, &param);
 }
 // (1)
-// func changeMap(mmm map[int]string) {
-// 	mmm[1] = "eeee";
-// 	fmt.Printf("changeMap func value: %v address: %p\n", mmm, &mmm);
-// }
+func changeMap(mmm map[int]string) {
+	mmm[1] = "eeee";
+	fmt.Printf("changeMap func value: %v address: %p\n", mmm, &mmm);
+}
 
 // (2)
-func changeMap(mmmm *map[int]string) {
-	// temp := *mmmm;
-	// temp[0] = "啛啛喳喳";
-	// fmt.Printf("func changeMap value: %v address: %p\n", temp, &temp);
-	mmmm = nil;
-	// *mmmm = nil;
-	fmt.Printf("func changeMap value: %v address: %p\n", mmmm, &mmmm);
-}
+// func changeMap(mmmm *map[int]string) {
+// 	// temp := *mmmm;
+// 	// temp[0] = "啛啛喳喳";
+// 	// fmt.Printf("func changeMap value: %v address: %p\n", temp, &temp);
+// 	mmmm = nil;
+// 	// *mmmm = nil;
+// 	fmt.Printf("func changeMap value: %v address: %p\n", mmmm, mmmm);
+// }
 
 // (3)
 // func changeParam(x int) {
@@ -1367,6 +1380,675 @@ func main() {
 	f := fibonacci()
 	for i := 0; i < 10; i++ {
 		fmt.Println(f())
+	}
+}
+```
+## 方法与接口
+### 方法
+**Go 没有类**。不过你可以为**结构体类型定义方法**。
+方法就是一类带特殊的 **接收者** 参数的函数。
+方法接收者在它自己的参数列表内，位于 func 关键字和方法名之间。
+在此例中，Abs 方法拥有一个名为 `v`，类型为 `Vertex` 的接收者。
+
+```go
+package main
+import (
+	"fmt"
+	"math"
+)
+type Vertex struct {
+	X, Y float64
+}
+func (v Vertex) Abs() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y);
+}
+func main() {
+	v := Vertex{3, 4};
+	fmt.Println(v.Abs());
+}
+```
+### 方法即是函数(Methods(class) are functions)
+记住：方法只是个带接收者参数的函数。
+现在这个 Abs 的写法就是个正常的函数，功能并没有什么变化。
+
+```go
+package main
+import (
+	"fmt"
+	"math"
+)
+type Vertex struct {
+	X, Y float64
+}
+// define a method
+// func (v Vertex) Abs() float64 {
+// 	return math.Sqrt(v.X*v.X + v.Y*v.Y);
+// }
+// function
+func Abs(v Vertex) float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y);
+}
+func main() {
+	v := Vertex {3, 4};
+	// fmt.Println(v.Abs());
+	fmt.Println(Abs(v));
+}
+```
+你也可以为非结构体类型声明方法。如例子中的一个带Abs方法的数值类型MyFloat。
+你只能为在同一个包内定义的类型的接受者声明方法，而不能为其他包内定义的类型(包括int之类的内建类型)的接受者声明方法。
+(注：就是**接收者的类型定义和方法声明必须在同一个包内**；不能为内建类型声明方法。)
+
+```go
+package main
+import (
+	"math"
+	"fmt"
+)
+type MyFloat float64
+func (f MyFloat) Abs() float64 {
+	if f < 0 {
+		 return float64(-f);
+	}
+	return float64(f);
+}
+func main() {
+	f := MyFloat(-math.Sqrt2);
+	fmt.Println(f.Abs());
+}
+// example 2
+package main
+import (
+	"fmt"
+)
+type MyInt int
+func (Myint MyInt) Abs() int {
+	if Myint < 0 {
+		return int(-Myint);
+	}
+	return int(Myint);
+}
+func main() {
+	myint := MyInt(-2);
+	fmt.Println(myint.Abs());
+}
+```
+通用：声明的方法为在类中添加方法，必须是初始化类，生成对象调用方法。
+### 指针接收者
+你可以为指针接收者声明方法。
+这意味着对于某类型 T，接收者的类型可以用 *T 的文法。（此外，T 不能是像 *int 这样的指针。）
+例如，这里为 *Vertex 定义了 Scale 方法。
+指针接收者的方法可以修改接收者指向的值（就像 Scale 在这做的）。由于方法经常需要修改它的接收者，指针接收者比值接收者更常用。
+试着移除第 16 行 Scale 函数声明中的 *，观察此程序的行为如何变化。
+若使用值接收者，那么 Scale 方法会对原始 Vertex 值的副本进行操作。（对于函数的其它参数也是如此。）Scale 方法必须用指针接受者来更改 main 函数中声明的 Vertex 的值。
+
+```go
+package main 
+import (
+	"math"
+	"fmt"
+)
+type Vertex struct {
+	X, Y float64
+}
+func (v Vertex) Abs() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y);
+}
+func (v *Vertex) Scale(f float64) {
+	// (*v).X = (*v).X * f;
+	// (*v).Y = (*v).Y * f;
+	v.X *= f;
+	v.Y *= f;
+	// 
+	fmt.Printf("2 value: %v type: %T address: %p\n", v, v, v);
+}
+// func (v Vertex) Scale(f float64) {
+// 	v.X = v.X * f;
+// 	v.Y = v.Y * f;
+// 	fmt.Printf("2 value: %v type: %T address: %p\n", v, v, &v);
+// }
+func main() {
+	v := Vertex{3, 4};
+	fmt.Printf("1 value: %v type: %T address: %p\n", v, v, &v);
+	v.Scale(10);
+	fmt.Printf("3 value: %v type: %T address %p\n", v, v, &v);
+	fmt.Println(v.Abs());
+}
+```
+### 指针与函数
+把 Abs 和 Scale 方法重写为函数。接着移除Scale中的*。
+
+```go
+package main
+import (
+	"math"
+	"fmt"
+)
+type Vertex struct {
+	X, Y float64
+}
+func Abs(v Vertex) float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y);
+}
+func Scale(v *Vertex, f float64) {
+	v.X =  v.X * f;
+	v.Y = v.Y * f;
+} 
+func main() {
+	v := Vertex{3, 4};
+	Scale(&v, 10);
+	fmt.Println(Abs(v));
+}
+```
+### 方法与指针重定向
+比较前两个程序，你大概会注意到带指针参数的函数必须接受一个指针：
+
+```go
+var v Vertex
+ScaleFunc(v, 5)  // 编译错误！
+ScaleFunc(&v, 5) // OK
+```
+而以指针为接受者的方法被调用时，接受者既能为值又能为指针：
+
+```go
+var v Vertex
+v.Scale(5)  // OK
+p := &v
+p.Scale(10) // OK
+```
+对于语句 `v.Scale(5)`，即便 v 是个值而非指针，带指针接收者的方法也能被直接调用。 也就是说，由于 Scale 方法有一个指针接收者，为方便起见，Go 会将语句 `v.Scale(5)` 解释为 `(&v).Scale(5)`。
+
+```go
+package main 
+import (
+	"fmt"
+)
+type Vertex struct {
+	X, Y float64
+}
+// define method
+func (v *Vertex) Scale(f float64) {
+	// (*v).X *= f;
+	// (*v).Y *= f;
+	v.X *= f;
+	v.Y *= f;
+}
+// define function
+func ScaleFunction(v *Vertex, f float64) {
+	v.X *= f;
+	v.Y *= f;
+}
+func main() {
+	// v := Vertex{3, 4}
+	// v.Scale(2)
+	// ScaleFunction(&v, 10)
+	// p := &Vertex{4, 3}
+	// p.Scale(3)
+	// ScaleFunction(p, 8)
+	// fmt.Println(v, p)
+	v := Vertex{3, 4};
+	v.Scale(10);
+	fmt.Println("1:",v);
+	ScaleFunction(&v, 2);
+	fmt.Println("2:", v);
+	// p := &v;
+	p := &Vertex{4, 3};
+	p.Scale(2);
+	fmt.Println("3:", p);
+	ScaleFunction(p, 10);
+	fmt.Println("4:", p);
+}
+```
+### 方法与指针重定向（续）
+同样的事情也发生在相反的方向。
+接受一个值作为参数的函数必须接受一个指定类型的值：
+
+```go
+var v Vertex
+fmt.Println(AbsFunc(v))  // OK
+fmt.Println(AbsFunc(&v)) // 编译错误！
+```
+而以值为接收者的方法被调用时，接收者既能为值又能为指针：
+
+```go
+var v Vertex
+fmt.Println(v.Abs()) // OK
+p := &v
+fmt.Println(p.Abs()) // OK
+```
+这种情况下，方法调用 p.Abs() 会被解释为 (*p).Abs()。
+
+```go
+package main
+import (
+	"fmt"
+	"math"
+)
+type Vertex struct {
+	X, Y float64
+}
+func (v Vertex) Abs() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y);
+}
+func AbsFunc(v Vertex) float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y);
+}
+func main() {
+	v := Vertex{3, 4};
+	fmt.Println(v.Abs());
+	fmt.Println(AbsFunc(v));
+	p := &Vertex{4, 3};
+	fmt.Println(p.Abs());
+	fmt.Println(AbsFunc(*p));
+}
+```
+### 选择值或指针作为接收者
+使用指针接收者的原因有二：
+首先，方法能够**修改其接收者指向的值**。
+其次，这样可以**避免在每次调用方法时复制该值**。若值的类型为大型结构体时，这样做会更加高效。
+在本例中，`Scale` 和 `Abs` 接收者的类型为 `*Vertex`，即便 Abs 并不需要修改其接收者。
+通常来说，所有给定类型的方法都应该有值或**指针接收者**，但并不应该二者混用。（我们会在接下来几页中明白为什么。）
+
+```go
+package main
+import (
+	"fmt"
+	"math"
+)
+type Vertex struct {
+	X, Y float64
+}
+// define method
+func (v *Vertex)Scale(f float64) {
+	v.X *= f;
+	v.Y *= f;
+}
+func (v *Vertex)Abs() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y);
+}
+// define function
+func ScaleFunc(v *Vertex, f float64){
+	v.X *= f;
+	v.Y *= f;
+}
+func AbsFunc(v *Vertex) float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y);
+}
+func main() {
+	v :=Vertex{3, 4};
+	v.Scale(2); 
+	// (&v).Scale(2); equal
+	fmt.Println(v);
+	// ScaleFunc(v, 20); cannot use v(type Vertex) as type *Vertex
+	ScaleFunc(&v, 20);
+	fmt.Println(v);
+
+	v2 := &Vertex{4, 5};
+	// fmt.Printf("Before scaling: %v, Abs: %v\n", v2, v2.Abs());
+	// fmt.Printf("Before scaling: %p, Abs: %v\n", v2, v2.Abs());
+	fmt.Printf("Before scaling: %+v, Abs: %v\n", v2, v2.Abs());
+	v2.Scale(5);
+	fmt.Printf("After Scaling: %+v, Abs: %v\n", v2, v2.Abs());
+}
+```
+### 接口
+**接口类型** 是由一组方法签名定义的集合
+接口类型的值可以保存任何实现了这些方法的值。
+
+```go
+package main
+import (
+	"fmt"
+	"math"
+)
+type MyFloat float64
+func (f MyFloat) Abs() float64 {
+	if f < 0 {
+		return float64(-f);
+	}
+	return float64(f);
+}
+type Vertex struct {
+	X, Y float64
+}
+func (v *Vertex) Abs() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y);
+} 
+// define interface
+type Abser interface {
+	Abs() float64
+}
+func main() {
+	// initlize
+	var a Abser;
+	f := MyFloat(-math.Sqrt2);
+	v := Vertex{3, 4};
+	a = f; // a MyFloat implements Abser
+	a = &v; // a *Vertex implements Abser
+	// 下面一行，v是一个Vertex(而不是 *Vertex)，所以没有实现Abser
+	a = v;
+	fmt.Println(a.Abs());
+}
+```
+### 接口与隐式实现
+类型通过**实现**一个**接口的所有方法** 来实现该接口。既然无需专门显示声明，也就没有“implement”关键字。
+隐式接口从接口的实现中解耦了定义，这样接口的实现可以出现在任何包中，无需提前准备。
+因此，也就无需再每一个实现上增加新的接口名称，这样同时也鼓励了明确的接口定义。
+
+```go
+package main
+import (
+	"fmt"
+)
+type I interface {
+	M();
+}
+type T struct {
+	S string;
+}
+// This method means type T implements the inteface I,
+// but we don't need to explicitly declare that it does so.
+func (t T) M() {
+	fmt.Println(t.S);
+}
+func main() {
+	var i I = T{"hellosdsfs"};
+	i.M();
+}
+```
+### 接口值
+在内部，接口值可以看做包含**值和具体类型**的元组： `(value, type)`
+接口值保存了一个具体底层类型的具体值。
+接口值调用方法时会执行其底层类型的同名方法。
+
+```go
+package main
+import (
+	"fmt"
+	"math"
+)
+// 1.声明接口
+type I interface {
+	M();
+}
+// 2.声明一个结构体T
+type T struct {
+	S string
+}
+// 3.结构体T声明结构体的方法，实现接口的方法，隐式实现
+func (t *T) M() {
+	fmt.Println(t.S);
+}
+type F float64
+func (f F) M() {
+	fmt.Println(f);
+}
+func main() {
+	var i I;
+	i = &T{"Hello"};
+	describe(i);
+	i.M();
+   // 接口 有具体类型的类的去实现，方法也相应的类的方法去实现。
+	i = F(math.Pi);
+	describe(i);
+	i.M();
+}
+func describe(i I) {
+	fmt.Printf("(%v, %T)\n", i, i);
+}
+```
+### 底层值为 nil 的接口值
+即便接口内的具体值为 nil，方法仍然会被 nil 接收者调用。
+在一些语言中，这会触发一个空指针异常，但在 Go 中通常会写一些方法来优雅地处理它（如本例中的 M 方法）。
+*注意：* 保存了 nil 具体值的接口其自身并不为 nil。
+
+```go
+package main
+import (
+	"fmt"
+)
+// 1.声明一个接口I
+type I interface {
+	M();
+}
+// 2.声明具体类型T 结构体
+type T struct {
+	S string
+}
+// 3.具体类型结构体T(reciever) 实现接口的方法(隐式实现)
+func (t *T) M() {
+	if t == nil {
+		fmt.Println("<nil>");
+		return;
+	}
+	fmt.Println(t.S);
+}
+func main() {
+	var i I;
+	var t *T;
+	i = t;
+	describe(i);
+	i.M();
+	i = &T{"Hellowqww"};
+	describe(i);
+	i.M();
+}
+func describe(i I) {
+	fmt.Printf("(%v %T)\n", i, i);
+}
+```
+### nil 接口值
+nil 接口值既不保存值也不保存具体类型。
+为 nil 接口调用方法会产生运行时错误，因为接口的元组内并未包含能够指明该调用哪个 具体 方法的类型。
+
+```go
+package main
+import (
+	"fmt"
+)
+type I interface {
+	M();
+}
+func main() {
+	var i I;
+	describe(i);
+	i.M();
+}
+func describe(i I) {
+	fmt.Printf("(%v %T)\n",i, i);
+}
+```
+### 空接口
+指定了零个方法的接口值被称为 *空接口：*  `interface{}`
+空接口可保存任何类型的值。（因为每个类型都至少实现了零个方法。）
+空接口被用来处理未知类型的值。例如，`fmt.Print` 可接受类型为 `interface{}` 的任意数量的参数。
+
+```go
+package main
+import (
+	"fmt"
+)
+func main() {
+	var i interface{};
+	describe(i);
+	i = 42;
+	describe(i);
+	i = "hello";
+	describe(i);
+}
+func describe(i interface{}) {
+	fmt.Printf("(%v %T)\n", i, i);
+}
+```
+### 类型断言
+**类型断言** 提供了访问接口值底层具体值的方式。
+`t := i.(T)`
+该语句断言接口值 i 保存了具体类型 T，并将其底层类型为 T 的值赋予变量 t。
+若 i 并未保存 T 类型的值，该语句就会触发一个panic。
+为了 判断 一个接口值是否保存了一个特定的类型，类型断言可返回两个值：其底层值以及一个报告断言是否成功的布尔值。
+`t, ok := i.(T)`
+若 i 保存了一个 T，那么 t 将会是其底层值，而 ok 为 true。
+否则，ok 将为 false 而 t 将为 T 类型的零值，程序并不会产生恐慌。
+请注意这种语法和读取一个映射时的相同之处。
+
+```go
+package main
+import (
+	"fmt"
+)
+func main() {
+	// 声明一个接口， 
+	var i interface{} = "hello";
+	fmt.Printf("(%v %T)\n",i, i);
+	s := i.(string);
+	fmt.Println(s);
+	s, ok := i.(string);
+	fmt.Println(s, ok);
+	f, ok := i.(float64);
+	fmt.Println(f, ok);
+	f = i.(float64);
+	fmt.Println(f);
+}
+```
+### 类型选择
+类型选择 是一种按顺序从几个类型断言中选择分支的结构。
+类型选择与一般的 switch 语句相似，不过类型选择中的 case 为类型（而非值）， 它们针对给定接口值所存储的值的类型进行比较。
+
+```go
+switch v := i.(type) {
+case T:
+    // v 的类型为 T
+case S:
+    // v 的类型为 S
+default:
+    // 没有匹配，v 与 i 的类型相同
+}
+```
+类型选择中的声明与类型断言 `i.(T)` 的语法相同，只是具体类型 T 被替换成了关键字 type。
+此选择语句判断接口值 i 保存的值类型是 T 还是 S。在 T 或 S 的情况下，变量 v 会分别按 T 或 S 类型保存 i 拥有的值。在默认（即没有匹配）的情况下，变量 v 与 i 的接口类型和值相同。
+
+```go
+package main
+import (
+	"fmt"
+)
+func do (i interface{}) {
+	switch v := i.(type) {
+		case int: 
+			fmt.Printf("Twice %v is %v\n", v, v*2);
+		case string:
+			fmt.Printf("%q is %v bytes long\n", v, len(v));
+		default:
+			fmt.Printf("I don't know about type %T!\n", v);
+	}
+}
+func main() {
+	do(11);
+	do("hell9");
+	do(true);
+}
+```
+### Stringer
+fmt 包中定义的 **Stringer** 是最普遍的接口之一。
+
+```go
+type Stringer interface {
+    String() string
+}
+```
+Stringer 是一个可以用字符串描述自己的类型。fmt 包（还有很多包）都通过此接口来打印值。
+
+```go
+package main
+import (
+	"fmt"
+)
+// type Stringer interface {
+// 	String() string;
+// }
+type Person struct {
+	Name string
+	Age int
+}
+func (p Person) String() string {
+	return fmt.Sprintf("%v (%v years)\n", p.Name, p.Age);
+}
+func main() {
+	a := Person{"Arthur Dent", 43};
+	z := Person{"Zaphod Beelebrox", 9001};
+	fmt.Println(a, z);
+}
+```
+### 练习：Stringer
+通过让 `IPAddr` 类型实现 `fmt.Stringer` 来打印点号分隔的地址。
+例如，`IPAddr{1, 2, 3, 4}` 应当打印为 `"1.2.3.4"`。
+
+```go
+package main
+
+import "fmt"
+
+type IPAddr [4]byte
+
+// TODO: Add a "String() string" method to IPAddr.
+func (ipAddr IPAddr) String() string {
+	
+	return fmt.Sprintf("%v.%v.%v.%v\n", ipAddr[0],ipAddr[1],ipAddr[2],ipAddr[3]);
+}
+
+func main() {
+	hosts := map[string]IPAddr{
+		"loopback":  {127, 0, 0, 1},
+		"googleDNS": {8, 8, 8, 8},
+	}
+	for name, ip := range hosts {
+		fmt.Printf("%v: %v\n", name, ip)
+	}
+}
+```
+### 错误
+Go 程序使用 `error` 值来表示错误状态。
+与 `fmt.Stringer` 类似，`error` 类型是一个内建接口：
+
+```go
+type error interface {
+    Error() string
+}
+```
+（与 fmt.Stringer 类似，fmt 包在打印值时也会满足 error。）
+通常函数会返回一个 error 值，调用的它的代码应当判断这个错误是否等于 nil 来进行错误处理。
+
+```go
+i, err := strconv.Atoi("42")
+if err != nil {
+    fmt.Printf("couldn't convert number: %v\n", err)
+    return
+}
+fmt.Println("Converted integer:", i)
+```
+error 为 nil 时表示成功；非 nil 的 error 表示失败。
+
+```go
+package main
+import (
+	"time"
+	"fmt"
+)
+type MyError struct {
+	When time.Time
+	What string
+}
+func (e *MyError) Error() string {
+	return fmt.Sprintf("at %v, %s", e.When, e.What);
+}
+func run() error {
+	return &MyError{
+		time.Now(),
+		"it didn't work",
+	};
+}
+func main() {
+	if err := run(); err != nil {
+		fmt.Println(err);
 	}
 }
 ```

@@ -2052,5 +2052,504 @@ func main() {
 	}
 }
 ```
+### 练习：错误
+从之前的练习中复制 Sqrt 函数，修改它使其返回 error 值。
+Sqrt 接受到一个负数时，应当返回一个非 nil 的错误值。复数同样也不被支持。
+创建一个新的类型
+`type ErrNegativeSqrt float64`
+并为其实现
+`func (e ErrNegativeSqrt) Error() string`
+方法使其拥有 error 值，通过 ErrNegativeSqrt(-2).Error() 调用该方法应返回 `"cannot Sqrt negative number: -2"`。
+*注意：* 在 Error 方法内调用 fmt.Sprint(e) 会让程序陷入死循环。可以通过先转换 e 来避免这个问题：fmt.Sprint(float64(e))。这是为什么呢？
+修改 Sqrt 函数，使其接受一个负数时，返回 `ErrNegativeSqrt` 值。
 
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func Sqrt(x float64) (float64, error) {
+	return 0, nil
+}
+
+func main() {
+	fmt.Println(Sqrt(2))
+	fmt.Println(Sqrt(-2))
+}
+```
+### Reader
+`io` 包指定了 `io.Reader` 接口，它表示从数据流的末尾进行读取。
+Go 标准库包含了该接口的许多实现，包括文件、网络连接、压缩和加密等等。
+`io.Reader` 接口有一个 `Read` 方法：
+`func (T) Read(b []byte) (n int, err error)`
+Read 用数据填充给定的字节切片并返回填充的字节数和错误值。在遇到数据流的结尾时，它会返回一个 io.EOF 错误。
+示例代码创建了一个 `strings.Reader` 并以每次 8 字节的速度读取它的输出。
+
+```go
+package main
+
+import (
+	"fmt"
+	"io"
+	"strings"
+)
+
+func main() {
+	r := strings.NewReader("Hello, Reader!")
+
+	b := make([]byte, 8)
+	for {
+		n, err := r.Read(b)
+		fmt.Printf("n = %v err = %v b = %v\n", n, err, b)
+		fmt.Printf("b[:n] = %q\n", b[:n])
+		if err == io.EOF {
+			break
+		}
+	}
+}
+```
+### 练习：Reader
+实现一个 Reader 类型，它产生一个 `ASCII`字符 `'A'` 的无限流。
+
+```go
+package main
+
+import "golang.org/x/tour/reader"
+
+type MyReader struct{}
+
+// TODO: Add a Read([]byte) (int, error) method to MyReader.
+
+func main() {
+	reader.Validate(MyReader{})
+}
+```
+### 练习：rot13Reader
+有种常见的模式是一个 `io.Reader` 包装另一个 `io.Reader`，然后通过某种方式修改其数据流。
+
+例如，`gzip.NewReader` 函数接受一个 `io.Reader`（已压缩的数据流）并返回一个同样实现了 `io.Reader` 的 `*gzip.Reader`（解压后的数据流）。
+
+编写一个实现了 `io.Reader` 并从另一个 `io.Reader` 中读取数据的 `rot13Reader`，通过应用 `rot13` 代换密码对数据流进行修改。
+
+`rot13Reader` 类型已经提供。实现 `Read`方法以满足 `io.Reader`。
+
+```go
+package main
+
+import (
+	"io"
+	"os"
+	"strings"
+)
+
+type rot13Reader struct {
+	r io.Reader
+}
+
+func main() {
+	s := strings.NewReader("Lbh penpxrq gur pbqr!")
+	r := rot13Reader{s}
+	io.Copy(os.Stdout, &r)
+}
+```
+### 图像
+`image` 包定义了 `Image` 接口：
+
+```go
+package image
+type Image interface {
+    ColorModel() color.Model
+    Bounds() Rectangle
+    At(x, y int) color.Color
+}
+```
+*注意：* `Bounds` 方法的返回值 `Rectangle` 实际上是一个 `image.Rectangle`，它在 `image` 包中声明。
+`color.Color` 和 `color.Model` 类型也是接口，但是通常因为直接使用预定义的实现 `image.RGBA` 和 `image.RGBAModel` 而被忽视了。这些接口和类型由 `image/color` 包定义。
+
+```go
+package main
+
+import (
+	"fmt"
+	"image"
+)
+
+func main() {
+	m := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	fmt.Println(m.Bounds())
+	fmt.Println(m.At(0, 0).RGBA())
+}
+```
+### 练习：图像
+还记得之前编写的图片生成器吗？我们再来编写另外一个，不过这次它将会返回一个 `image.Image` 的实现而非一个数据切片。
+
+定义你自己的 Image 类型，实现必要的方法并调用 `pic.ShowImage`。
+
+Bounds 应当返回一个 `image.Rectangle` ，例如 `image.Rect(0, 0, w, h)`。
+
+`ColorModel` 应当返回 `color.RGBAModel`。
+
+At 应当返回一个颜色。上一个图片生成器的值 v 对应于此次的 `color.RGBA{v, v, 255, 255}`。
+
+```go
+package main
+
+import "golang.org/x/tour/pic"
+
+type Image struct{}
+
+func main() {
+	m := Image{}
+	pic.ShowImage(m)
+}
+```
+## 并发
+### goroutine
+Go 程（goroutine）是由 Go 运行时管理的轻量级线程。
+`go f(x, y, z)`会启动一个新的 goroutine并执行`f(x, y, z)`。
+f, x, y 和 z 的**求值**发生在当前的 Go 程中，而**f的执行**发生在新的 Go 程中。
+Go 程在相同的地址空间中运行，因此在访问共享的内存时必须进行同步。sync 包提供了这种能力，不过在 Go 中并不经常用到，因为还有其它的办法（见下一页）。
+
+```go
+package main 
+import (
+	"fmt"
+	"time"
+)
+func say(s string) {
+	for i:= 1; i < 5; i++ {
+		time.Sleep(100*time.Millisecond);
+		fmt.Println(s);
+	}
+}
+func main() {
+	go say("hellod");
+	// fmt.Printf("address: %p", say);
+	say("easonchen");
+}
+```
+### 信道(Channels)
+信道是带有类型的管道，你可以通过它用信道操作符 `<-` 来发送或者接收值。
+
+```go
+ch <- v    // 将 v 发送至信道 ch。
+v := <-ch  // 从 ch 接收值并赋予 v。
+```
+（“箭头”就是数据流的方向。）
+和映射与切片一样，信道在使用前必须创建：`ch := make(chan int)`
+默认情况下，发送和接收操作在另一端准备好之前都会阻塞。这使得 Go 程可以在没有显式的锁或竞态变量的情况下进行同步。
+以下示例对切片中的数进行求和，将任务分配给两个 Go 程。一旦两个 Go 程完成了它们的计算，它就能算出最终的结果。
+
+```go
+package main
+import (
+	"fmt"
+)
+func sum(s []int, c chan int) {
+	sum := 0;
+	for _, v := range s {
+		sum += v;
+	}
+	c <- sum;// 将和送入 c
+}
+func main() {
+	s := []int{1, 2, 3, 5, 7, 9};
+	c := make(chan int);
+	go sum(s[:len(s)/2], c);
+	go sum(s[len(s)/2:], c);
+	x, y := <-c, <-c; // 接受者
+	fmt.Println(x, y, x+y);
+}
+```
+### 带缓冲的信道
+信道可以是 带缓冲的。将缓冲长度作为第二个参数提供给 make 来初始化一个带缓冲的信道：
+`ch := make(chan int, 100)`
+仅当信道的缓冲区填满后，向其发送数据时才会阻塞。当缓冲区为空时，接受方会阻塞。
+修改示例填满缓冲区，然后看看会发生什么。
+
+```go
+
+package main
+import (
+	"fmt"
+)
+func main() {
+	ch := make(chan int, 4);
+	ch <- 1;
+	ch <- 2;
+	ch <- 3;
+	ch <- 4;
+	fmt.Println(<-ch);
+	fmt.Println(<-ch);
+}
+```
+### range 和 close
+发送者可通过 `close` 关闭一个信道来表示没有需要发送的值了。接收者可以通过为接收表达式分配第二个参数来测试信道是否被关闭：若没有值可以接收且信道已被关闭，那么在执行完
+`v, ok := <-ch`
+之后 ok 会被设置为 false。
+循环 `for i := range c` 会不断从信道接收值，直到它被关闭。
+*Note：* 只有发送者才能关闭信道，而接收者不能。向一个已经关闭的信道发送数据会引发程序恐慌（panic）。
+*Another Note：* 信道与文件不同，通常情况下无需关闭它们。只有在必须告诉接收者不再有值需要发送的时候才有必要关闭，例如终止一个 range 循环。
+
+```go
+package main
+import (
+	"fmt"
+)
+func fibonacci(n int, c chan int) {
+	x, y := 0, 1;
+	for i:=0; i<n; i++ {
+		c <- x;
+		x, y = y, x+y;
+	}
+	close(c);
+}
+func main() {
+	c := make(chan int, 10);
+	go fibonacci(cap(c), c);
+	for i := range c {
+		fmt.Println(i);
+	}
+}
+```
+### select 语句
+select 语句使一个 Go 程可以等待多个通信操作。
+select 会阻塞到某个分支可以继续执行为止，这时就会执行该分支。当多个分支都准备好时会随机选择一个执行。
+
+```go
+package main
+import (
+	"fmt"
+)
+func fibonacci (c, quit chan int) {
+	x, y := 0, 1;
+	for {
+		select {
+		case c <- x:
+			x, y = y, x+y;
+		case <- quit:
+			fmt.Println("quit");
+			return;
+		}
+	}
+}
+func main() {
+	c := make(chan int);
+	quit := make(chan int);
+	go func() {
+		for i := 0; i < 10; i++ {
+			fmt.Println(<-c);
+		}
+		quit <- 0;
+	}();
+	fibonacci(c, quit);
+}
+```
+### 默认选择
+当 select 中的其它分支都没有准备好时，default 分支就会执行。
+为了在尝试发送或者接收时不发生阻塞，可使用 default 分支：
+
+```go
+select {
+case i := <-c:
+    // 使用 i
+default:
+    // 从 c 中接收会阻塞时执行
+}
+```
+
+```go
+package main
+import (
+	"fmt"
+	"time"
+)
+func main() {
+	tick := time.Tick(100*time.Millisecond);
+	boom := time.After(500*time.Millisecond);
+	for {
+		select {
+		case <- tick:
+			fmt.Println("tick");
+		case <- boom:
+			fmt.Println("boom");
+			return;
+		default:
+			fmt.Println("   .")
+			time.Sleep(50*time.Millisecond);
+		}
+	}
+}
+```
+
+### 练习：等价二叉查找树
+1. 实现 Walk 函数。
+
+2. 测试 Walk 函数。
+
+函数 tree.New(k) 用于构造一个随机结构的已排序二叉查找树，它保存了值 k, 2k, 3k, ..., 10k。
+
+创建一个新的信道 ch 并且对其进行步进：
+
+go Walk(tree.New(1), ch)
+然后从信道中读取并打印 10 个值。应当是数字 1, 2, 3, ..., 10。
+
+3. 用 Walk 实现 Same 函数来检测 t1 和 t2 是否存储了相同的值。
+
+4. 测试 Same 函数。
+
+Same(tree.New(1), tree.New(1)) 应当返回 true，而 Same(tree.New(1), tree.New(2)) 应当返回 false。
+
+```go
+package main
+import "golang.org/x/tour/tree"
+// Walk 步进 tree t 将所有的值从 tree 发送到 channel ch。
+func Walk(t *tree.Tree, ch chan int)
+// Same 检测树 t1 和 t2 是否含有相同的值。
+func Same(t1, t2 *tree.Tree) bool
+func main() {
+}
+```
+### sync.Mutex
+我们已经看到信道非常适合在各个 Go 程间进行通信。
+
+但是如果我们并不需要通信呢？比如说，若我们只是想保证每次只有一个 Go 程能够访问一个共享的变量，从而避免冲突？
+
+这里涉及的概念叫做` _互斥（mutual_exclusion）_` ，我们通常使用 `_互斥锁（Mutex）_` 这一数据结构来提供这种机制。
+
+Go 标准库中提供了 `sync.Mutex` 互斥锁类型及其两个方法：
+
+`Lock`
+`Unlock`
+我们可以通过在代码前调用 Lock 方法，在代码后调用 Unlock 方法来保证一段代码的互斥执行。参见 Inc 方法。
+
+我们也可以用 defer 语句来保证互斥锁一定会被解锁。参见 Value 方法。
+
+```go
+package main
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+// SafeCounter 的并发使用是安全的
+type SafeCounter struct {
+	v map[string]int
+	mux sync.Mutex
+}
+// Inc增加给定key的计数器的值
+func (c *SafeCounter) Inc(key string) {
+	c.mux.Lock();
+	// Lock之后同一时刻只有一个goroutine能访问c.v
+	c.v[key]++;
+	c.mux.Unlock();
+}
+// Value返回给定key的计数器的当前值
+func (c *SafeCounter) Value(key string) int {
+	c.mux.Lock()
+	// Lock之后同一时刻只有一个goroutine能访问c.v
+	defer c.mux.Unlock();
+	return c.v[key];
+}
+func main() {
+	c := SafeCounter{v: make(map[string]int)};
+	for i :=0; i<1000; i++ {
+		go c.Inc("Somekey");
+	}
+	time.Sleep(time.Second);
+	fmt.Println(c.Value("Somekey"));
+}
+```
+###练习：Web 爬虫
+在这个练习中，我们将会使用 Go 的并发特性来并行化一个 Web 爬虫。
+修改 Crawl 函数来并行地抓取 URL，并且保证不重复。
+提示：你可以用一个 map 来缓存已经获取的 URL，但是要注意 map 本身并不是并发安全的！
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+type Fetcher interface {
+	// Fetch 返回 URL 的 body 内容，并且将在这个页面上找到的 URL 放到一个 slice 中。
+	Fetch(url string) (body string, urls []string, err error)
+}
+
+// Crawl 使用 fetcher 从某个 URL 开始递归的爬取页面，直到达到最大深度。
+func Crawl(url string, depth int, fetcher Fetcher) {
+	// TODO: 并行的抓取 URL。
+	// TODO: 不重复抓取页面。
+        // 下面并没有实现上面两种情况：
+	if depth <= 0 {
+		return
+	}
+	body, urls, err := fetcher.Fetch(url)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("found: %s %q\n", url, body)
+	for _, u := range urls {
+		Crawl(u, depth-1, fetcher)
+	}
+	return
+}
+
+func main() {
+	Crawl("https://golang.org/", 4, fetcher)
+}
+
+// fakeFetcher 是返回若干结果的 Fetcher。
+type fakeFetcher map[string]*fakeResult
+
+type fakeResult struct {
+	body string
+	urls []string
+}
+
+func (f fakeFetcher) Fetch(url string) (string, []string, error) {
+	if res, ok := f[url]; ok {
+		return res.body, res.urls, nil
+	}
+	return "", nil, fmt.Errorf("not found: %s", url)
+}
+
+// fetcher 是填充后的 fakeFetcher。
+var fetcher = fakeFetcher{
+	"https://golang.org/": &fakeResult{
+		"The Go Programming Language",
+		[]string{
+			"https://golang.org/pkg/",
+			"https://golang.org/cmd/",
+		},
+	},
+	"https://golang.org/pkg/": &fakeResult{
+		"Packages",
+		[]string{
+			"https://golang.org/",
+			"https://golang.org/cmd/",
+			"https://golang.org/pkg/fmt/",
+			"https://golang.org/pkg/os/",
+		},
+	},
+	"https://golang.org/pkg/fmt/": &fakeResult{
+		"Package fmt",
+		[]string{
+			"https://golang.org/",
+			"https://golang.org/pkg/",
+		},
+	},
+	"https://golang.org/pkg/os/": &fakeResult{
+		"Package os",
+		[]string{
+			"https://golang.org/",
+			"https://golang.org/pkg/",
+		},
+	},
+}
+```
 

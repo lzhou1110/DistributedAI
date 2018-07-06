@@ -6,8 +6,8 @@ import(
 	"math"
 )
 type NeuralNetwork struct {
-	HiddenLayer			[]float64
 	InputLayer			[]float64
+	HiddenLayer			[]float64
 	OutputLayer			[]float64
 	WeightHidden		[][]float64
 	WeightOutput		[][]float64
@@ -41,7 +41,7 @@ func makeMatrix(rows, colums int, value float64) [][]float64 {
 	}
 	return mat;
 }
-// NewNeuralNetWork 新建一个神经网络
+// NewNeuralNetWork 新建一个神经网络 784, 100, 10, false, 0.25, 0.1
 func NewNetwork(iInputCount, iHiddenCount, iOutputCount int, iRegression bool, iRate1, iRate2 float64) *NeuralNetwork {
 	//fmt.Println();
 	iInputCount += 1;
@@ -85,27 +85,29 @@ func sigmoid(X float64) float64 {
 func dsigmoid(Y float64) float64 {
 	return Y * (1.0 - Y);
 }
-// Forward 前向传播 input = (60000,)
+// Forward 前向传播 input = (784,)
 func (self *NeuralNetwork) Forward(input []float64) (output []float64) {
 	if len(input) + 1 != len(self.InputLayer){
 		panic("amount of input variable doesn't match");
 	}
+	// InputLayer
 	for i := 0; i < len(input); i++ {
 		self.InputLayer[i] = input[i];
 	}
 	self.InputLayer[len(self.InputLayer) - 1] = 1.0; // bias node for input layer
+	// HiddenLayer (784,) matrix multiply with (60000, 784)
 	for i:= 0; i<len(self.HiddenLayer)-1; i++ {
 		sum := 0.0;
-		for j := 0; i < len(self.InputLayer); j++ {
+		for j := 0; i < len(self.InputLayer); j++ { // WeightHidden(100, 784) * InputLayer(784,) + b
 			sum += self.InputLayer[j] * self.WeightHidden[i][j];
 		}
 		self.HiddenLayer[i] = sigmoid(sum);
 	}
-	// HiddenLayer
 	self.HiddenLayer[len(self.HiddenLayer) - 1] = 1.0; // bias node for hidden layer
+	// OutputLayer
 	for i := 0; i < len(self.OutputLayer); i++ {
 		sum := 0.0;
-		for j := 0; j < len(self.HiddenLayer); j++ {
+		for j := 0; j < len(self.HiddenLayer); j++ { 	// WeightOutput(10, 100) * HiddenLayer(10,) + b
 			sum += self.HiddenLayer[j] * self.WeightOutput[i][j];
 		}
 		if self.Regression {
@@ -126,7 +128,7 @@ func (self *NeuralNetwork) Feedback(target []float64) {
 		err := 0.0;
 		for j := 0; j <len(self.OutputLayer); j++ {
 			if self.Regression {
-				err += self.ErrOutput[j] * self.WeightOutput[j][i];
+				err += self.ErrOutput[j] * self.WeightOutput[j][i]; //
 			} else {
 				err += self.ErrOutput[j] * self.WeightOutput[j][i] * dsigmoid(self.OutputLayer[j]);
 			}
@@ -134,7 +136,7 @@ func (self *NeuralNetwork) Feedback(target []float64) {
 		self.ErrHidden[i] = err;
 	}
 
-	for i:=0; i <len(self.OutputLayer); i++ {
+	for i := 0; i <len(self.OutputLayer); i++ {
 		for j := 0; j <len(self.HiddenLayer); j++ {
 			change := 0.0;
 			delta := 0.0;
@@ -144,7 +146,7 @@ func (self *NeuralNetwork) Feedback(target []float64) {
 				delta = self.ErrOutput[i] * dsigmoid(self.OutputLayer[i]);
 			}
 			change = self.Rate1 * delta * self.HiddenLayer[j] + self.Rate2 * self.LastChangeOutput[i][j];
-			self.WeightOutput[i][j] -= change;
+			self.WeightOutput[i][j] -= change;   // w = w - rate * delta *
 			self.LastChangeOutput[i][j] = change;
 		}
 	}

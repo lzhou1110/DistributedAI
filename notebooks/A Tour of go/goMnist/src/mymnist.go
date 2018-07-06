@@ -101,7 +101,7 @@ func main() {
 	targets := prepareY(labelData); //(60000, 10)
 	//fmt.Println(inputs[0]);
 	//fmt.Println(targets[:1]);
-	nn := gonn.NewNetwork(784,  100, 10, false, 0.25, 0.1);
+	nn := gonn.NewNetwork(784, 100, 10, false, 0.25, 0.1);
 	//fmt.Println(nn);
 	nn.Train(inputs, targets, 10);
 }

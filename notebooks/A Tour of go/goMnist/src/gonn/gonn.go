@@ -98,7 +98,7 @@ func (self *NeuralNetwork) Forward(input []float64) (output []float64) {
 	// HiddenLayer (784,) matrix multiply with (60000, 784)
 	for i:= 0; i<len(self.HiddenLayer)-1; i++ {
 		sum := 0.0;
-		for j := 0; i < len(self.InputLayer); j++ { // WeightHidden(100, 784) * InputLayer(784,) + b
+		for j := 0; j < len(self.InputLayer); j++ { // WeightHidden(100, 784) * InputLayer(784,) + b
 			sum += self.InputLayer[j] * self.WeightHidden[i][j];
 		}
 		self.HiddenLayer[i] = sigmoid(sum);
@@ -116,7 +116,7 @@ func (self *NeuralNetwork) Forward(input []float64) (output []float64) {
 			self.OutputLayer[i] = sigmoid(sum);
 		}
 	}
-	return self.OutputLayer;
+	return self.OutputLayer[:];
 }
 //Feedback backprogation
 func (self *NeuralNetwork) Feedback(target []float64) {
@@ -195,11 +195,10 @@ func (self *NeuralNetwork) Train(inputs [][]float64, targets [][]float64, iterat
 				}
 				fmt.Printf("iteration %vth / progress %.2f %% \r", i+1, float64(j) * 100/float64(len(inputs)));
 			}
-			if (iteration >= 10 && (i + 1) % (iteration / 10 ) == 0) || iteration < 10 {
-				fmt.Printf("\niteration %vth loss: %.5f", i+1, cur_err / float64(len(inputs)));
-			}
-
 		}
-		fmt.Println("\ndone.");
+		if (iteration >= 10 && (i + 1) % (iteration / 10 ) == 0) || iteration < 10 {
+			fmt.Printf("\niteration %vth err: %.5f", i+1, cur_err / float64(len(inputs)));
+		}
 	}
+	fmt.Println("\ndone.");
 }

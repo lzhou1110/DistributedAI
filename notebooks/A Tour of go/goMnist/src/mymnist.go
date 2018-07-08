@@ -66,6 +66,18 @@ func prepareY(N []byte) [][]float64 {
 	}
 	return result;
 }
+// 获取最大值
+func argmax(A []float64) int {
+	x := 0;
+	v := -1.0;
+	for i, a := range(A) {
+		if a > v {
+			x = i;
+			v = a;
+		}
+	}
+	return x;
+}
 func main() {
 	//sourceLabelFile := flag.String("sl", "", "source label file")
 	//sourceImageFile := flag.String("si", "", "source image File")
@@ -77,7 +89,7 @@ func main() {
 	testImageFile := flag.String("ti", "./t10k-images-idx3-ubyte", "./t10k-images-idx3-ubyte")
 	flag.Parse()
 
-	if *sourceLabelFile == "" || *testLabelFile == "" || *sourceImageFile == "" || *testImageFile == ""{
+	if *sourceLabelFile == "" || *testLabelFile == ""{
 		flag.Usage()
 		os.Exit(-2)
 	}
@@ -104,4 +116,30 @@ func main() {
 	nn := gonn.NewNetwork(784, 100, 10, false, 0.25, 0.1);
 	//fmt.Println(nn);
 	nn.Train(inputs, targets, 10);
+
+	// 测试数据
+	var testLabelData []byte;
+	var testImageData [][]byte;
+	if *testLabelFile != "" && *testImageFile != "" {
+		fmt.Println("Loading test data...");
+		testLabelData = ReadMNISTLabels(OpenFile(*testLabelFile));
+		testImageData, _, _ = ReadMNISTImages(OpenFile(*testImageFile));
+	}
+
+	test_inputs := prepareX(testImageData);
+	test_targets := prepareY(testLabelData);
+	//test_inputs = inputs[:1000]
+	//test_targets = targets[:1000]
+
+	correct_ct := 0;
+	for i, p := range(test_inputs) {
+		//fmt.Println(nn.Forward(p));
+		y := argmax(nn.Forward(p));
+		yy := argmax(test_targets[i]);
+		if y == yy {
+			correct_ct += 1;
+		}
+	}
+
+	fmt.Println("correct rate: ", float64(correct_ct)/ float64(len(test_inputs)), correct_ct,len(test_inputs));
 }

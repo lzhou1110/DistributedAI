@@ -167,7 +167,7 @@ func __round__ (x float64) float64 {
 }
 
 func mnist (dataset *MNISTDataset) {
-   // make CNN model
+   // create CNN model
    nn.RandomSeed()
    n := nn.NewNeuralChain()
 
@@ -216,8 +216,9 @@ func mnist (dataset *MNISTDataset) {
          error ++
       }
    }
-   fmt.Printf("Test Loss: %.2f%%\n", float64(error) / float64(testSetNum))
+   fmt.Printf("Test Loss: %.6f%%  correct: %.6f%%\n", float64(error) / float64(testSetNum), 1.0 - float64(error) / float64(testSetNum))
 }
+
 
 func main () {
    //MNISTDataLoad()

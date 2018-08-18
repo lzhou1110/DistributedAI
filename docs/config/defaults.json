@@ -16,7 +16,6 @@
     "theme": "ace/theme/atom_dark"
   },
   "exampleFiles": [
-    "DistrubutedAi.yaml",
     "default.yaml",
     "heroku-pets.yaml",
     "minimal.yaml",

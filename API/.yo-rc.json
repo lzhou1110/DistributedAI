@@ -1,0 +1,11 @@
+{
+  "generator-openapi-repo": {
+    "importExistingSpec": true,
+    "importedSpec": "C:\\Users\\zheng\\Desktop\\SRTP\\Distrubuted Ai.yaml",
+    "name": "Distrubuted Ai",
+    "repo": "lzhou1110/DistributedAI",
+    "splitSpec": true,
+    "samples": true,
+    "installSwaggerUI": true
+  }
+}

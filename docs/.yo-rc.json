@@ -1,8 +1,8 @@
 {
   "generator-openapi-repo": {
     "importExistingSpec": true,
-    "importedSpec": "C:\\Users\\zheng\\Desktop\\SRTP\\Distrubuted Ai.yaml",
-    "name": "Distrubuted Ai",
+    "importedSpec": "spec-files/DistrubutedAi.yaml",
+    "name": "DistributedAi",
     "repo": "lzhou1110/DistributedAI",
     "splitSpec": true,
     "samples": true,

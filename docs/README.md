@@ -1,4 +1,4 @@
-# Distrubuted Ai OpenAPI Specification
+# DistributedAi OpenAPI Specification
 [![Build Status](https://travis-ci.org/lzhou1110/DistributedAI.svg?branch=master)](https://travis-ci.org/lzhou1110/DistributedAI)
 
 ## Steps to finish

@@ -67,6 +67,7 @@ var defaults = {
    * example is a combination of `examplesFolder` and file name
   */
   exampleFiles: [
+    'DistrubutedAi.yaml',
     'default.yaml',
     'heroku-pets.yaml',
     'minimal.yaml',

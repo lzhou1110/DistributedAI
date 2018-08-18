@@ -308,11 +308,11 @@ definitions:
         type: number
         format: float
         example: 30.0
-      Varience:
+      Variance:
         type: number
         format: float
         example: 60.5
-      Attribute:
+      Attributes:
         type: array
         items:
           type: string
@@ -517,7 +517,7 @@ definitions:
       - TrainResultAddress
       - TrasactionDetailsAddress
     properties:
-      ResultAddress:
+      TrainResultAddress:
         $ref: '#/definitions/IPFSAddress'
       TrasactionDetailsAddress:
         $ref: '#/definitions/IPFSAddress'

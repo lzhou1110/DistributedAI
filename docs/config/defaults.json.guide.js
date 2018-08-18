@@ -54,7 +54,7 @@ var defaults = {
    * Note that this string will be used in between two other url segments
    * so you always need the trailing and leading slashes
   */
-  examplesFolder: '',
+  examplesFolder: 'spec-files/',
 
   /*
    * Ace editor options. This object will overload existing editor options.
@@ -67,7 +67,7 @@ var defaults = {
    * example is a combination of `examplesFolder` and file name
   */
   exampleFiles: [
-    'Distrubuted Ai.yaml'
+    'Distrubuted Ai.yaml',
     'default.yaml',
     'heroku-pets.yaml',
     'minimal.yaml',

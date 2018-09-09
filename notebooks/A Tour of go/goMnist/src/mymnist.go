@@ -33,6 +33,7 @@ func ReadMNISTImages(r io.Reader)(images [][]byte, width, height int) {
 	images = make([][]byte, header[1])
 	width, height = int(header[2]), int(header[3])
 	for i := 0; i<len(images); i++ {
+
 		images[i] = make([]byte, width * height)
 		r.Read(images[i])
 	}
@@ -80,13 +81,13 @@ func argmax(A []float64) int {
 }
 func main() {
 	//sourceLabelFile := flag.String("sl", "", "source label file")
-	//sourceImageFile := flag.String("si", "", "source image File")
+	//source ImageFile := flag.String("si", "", "source image File")
 	//testLabelFile := flag.String("tl", "", "test label file")
 	//testImageFile := flag.String("ti", "", "test image file")
-	sourceLabelFile := flag.String("sl", "./train-labels-idx1-ubyte", "./train-labels-idx1-ubyte")
-	sourceImageFile := flag.String("si", "./train-images-idx3-ubyte", "./train-images-idx3-ubyte")
-	testLabelFile := flag.String("tl", "./t10k-labels-idx1-ubyte", "./t10k-labels-idx1-ubyte")
-	testImageFile := flag.String("ti", "./t10k-images-idx3-ubyte", "./t10k-images-idx3-ubyte")
+	sourceLabelFile := flag.String("sl", "src/train-labels-idx1-ubyte", "./train-labels-idx1-ubyte")
+	sourceImageFile := flag.String("si", "src/train-images-idx3-ubyte", "./train-images-idx3-ubyte")
+	testLabelFile := flag.String("tl", "src/t10k-labels-idx1-ubyte", "./t10k-labels-idx1-ubyte")
+	testImageFile := flag.String("ti", "src/t10k-images-idx3-ubyte", "./t10k-images-idx3-ubyte")
 	flag.Parse()
 
 	if *sourceLabelFile == "" || *testLabelFile == ""{
@@ -95,6 +96,7 @@ func main() {
 	}
 	fmt.Println("Loading training data...")
 	// 获取label数据 image数据
+	// go run mymnist.go -si train-images-idx3-ubyte -sl train-labels-idx1-ubyte  -ti t10k-images-idx3-ubyte   -tl t10k-labels-idx1-ubyte
 	labelData := ReadMNISTLabels(OpenFile(*sourceLabelFile))  // go run example_mnist/mymnist.go didn't work
 	fmt.Printf("%T %v\n",labelData, labelData[:10])
 	imageData, width, height := ReadMNISTImages(OpenFile(*sourceImageFile))

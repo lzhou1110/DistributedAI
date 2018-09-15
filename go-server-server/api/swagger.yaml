@@ -1,0 +1,486 @@
+---
+swagger: "2.0"
+info:
+  description: "分布式AI系统架构与API文档说明\n\n系统架构图在https://github.com/lzhou1110/DistributedAI/blob/master/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84.jpg\n\
+    \n1.存储采用IPFS，可以使用storage/post(file_path)将一个文件上传至IPFS，并且返回文件在IPFS上的地址\n使用/storage/{IPFSAddress}可\
+    以从地址`IPFSAddress`上下载文件\n\n2.交易前：\n①数据方： 数据方上传前在提供\n（1）DataSchema：数据格式\n（2）MetaSchema：\
+    原数据，主要是QI，用于客观描述数据\n（3）Payment：数据售价\n然后上传IPFS网络，用tansaction/bidData将数据====>数据池\
+    \n参数和响应值可以看下方的API，如参数为\"DataSchemaAddress\"， 可以查看Model中的DataSchema方便理解。\n\n②运算\
+    方：运算方在上传前提供\n（1）OperationSchemaAddress：运算类型地址\n（2）ComputingAddress：运算资源地址\n（3）\
+    PaymentAddress：运算价格地址\n（4）ComputerAttributesAddress：运算资源信息\n然后调用tansaction/bidComputing====>\
+    \ 运算池 并将运算方公钥上传IPFS，并将地址上传。\n\n③ 模型方：公开同态加密的公钥，用公钥加密模型，上传IPFS网络，并将两者地址上传\n\n3.开\
+    始交易\n（1）模型方浏览当前的数据，自行挑选数据（提供两种方式：1 输入schema 地址 -> 匹配所有数据地址 2 输入所需数据的标签 -> 匹配schema\
+    \ 地址），将符合的数据的Meta Data下载至本地，利用Meta Data中的数据计算数据质量，选定数据\n（2）调用API：/transaction/askTraining\
+    \ 发起交易，返回TransationDetail（json,目前只有ID一个属性）\n（3）发起交易成功则调用/transaction/askForData，\
+    向数据方请求上传数据。（具体参数看API和Model）\n（4）数据方先用模型方的公钥进行同态加密，再用运算方的AES公钥加密，上传至IPFS，并将地址上传\
+    \n（5）运算方下载数据，进行AES解密，得到同态加密的模型和数据，开始训练（运算方应该有一个代码托管的框架，直接调用接口train便可以训练任何模型）。\n\
+    （6）达到stopCondition停止训练，并调用/transaction/uploadTrainResult将运算结果上传，通过协议层发送至模型方，模型\
+    方解密收到运算结果并进行整合。\n\n4.结束交易。\n（1）模型方根据交易时所确定的Token Strategy（如:反向博弈论）进行tokens的分配\n\
+    （2）模型的使用：模型的使用必须针对加密过的数据，也就是使用模型时需要先用同态加密对数据进行加密，然后才能使用模型。"
+  version: "1.0.0"
+  title: "Distrubuted AI"
+tags:
+- name: "storage"
+  description: "Upload or download files from IPFS"
+- name: "transaction"
+  description: "Complete the transaction"
+paths:
+  /storage:
+    post:
+      tags:
+      - "storage"
+      summary: "Upload a new file to IPFS"
+      description: "upload file to ipfs and return the address"
+      consumes:
+      - "multipart/form-data"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "file"
+        in: "formData"
+        description: "the file' local path"
+        required: true
+        type: "file"
+        x-exportParamName: "File"
+      responses:
+        201:
+          description: "successful"
+          schema:
+            $ref: "#/definitions/IPFSAddress"
+        400:
+          description: "can not find the file"
+        500:
+          description: "upload fail"
+  /storage/{IPFSAddress}:
+    get:
+      tags:
+      - "storage"
+      summary: "Download file from IPFS by address"
+      description: "Download file from IPFS by address and return the data"
+      operationId: "getFromIpfs"
+      produces:
+      - "multipart/form-data"
+      parameters:
+      - name: "IPFSAddress"
+        in: "path"
+        required: true
+        type: "string"
+        maxLength: 46
+        minLength: 46
+        x-exportParamName: "IPFSAddress"
+      responses:
+        201:
+          description: "successful"
+          schema:
+            type: "file"
+        400:
+          description: "Invaild address"
+        500:
+          description: "Download fail"
+  /transaction/bidData:
+    post:
+      tags:
+      - "transaction"
+      summary: "bid data"
+      description: "begin to sell data"
+      operationId: "bidData"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "BidDataInfo"
+        description: "the arguments required for bid data"
+        required: true
+        schema:
+          $ref: "#/definitions/BidDataInfo"
+        x-exportParamName: "BidDataInfo"
+      responses:
+        201:
+          description: "bid data successfully"
+        400:
+          description: "bid data failed"
+        500:
+          description: "error."
+  /transaction/bidComputing:
+    post:
+      tags:
+      - "transaction"
+      summary: "bid computing"
+      description: "Judging for bid computing"
+      operationId: "bidComputing"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "BidComputingInfo"
+        description: "the arguments required for bid Computing"
+        required: true
+        schema:
+          $ref: "#/definitions/BidComputingInfo"
+        x-exportParamName: "BidComputingInfo"
+      responses:
+        201:
+          description: "bid computing successfully"
+        400:
+          description: "bid computing failed"
+        500:
+          description: "error."
+  /transaction/askTraining:
+    post:
+      tags:
+      - "transaction"
+      summary: "begin to train"
+      description: "begin to train"
+      operationId: "askTraining"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "transactionInfo"
+        description: "transaction infomation"
+        required: true
+        schema:
+          $ref: "#/definitions/TransactionInfo"
+        x-exportParamName: "TransactionInfo"
+      responses:
+        201:
+          description: "successful, return TransactionDetailAddress"
+          schema:
+            $ref: "#/definitions/IPFSAddress"
+        500:
+          description: "Transaction fail"
+  /transaction/askForData:
+    get:
+      tags:
+      - "transaction"
+      summary: "ask for data"
+      description: "data encrypt and uplaod"
+      operationId: "askForData"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "askForDataInfo"
+        description: "the arguments required for data"
+        required: true
+        schema:
+          $ref: "#/definitions/AskForDataInfo"
+        x-exportParamName: "AskForDataInfo"
+      responses:
+        200:
+          description: "OK, receive the request"
+        500:
+          description: "error"
+  /transaction/uploadTrainResult:
+    put:
+      tags:
+      - "transaction"
+      summary: "upload train result to model owner"
+      description: "upload train result to model owner"
+      operationId: "uploadTrainRes"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "uploadTrainResInfo"
+        description: "the arguments required for upload result"
+        required: true
+        schema:
+          $ref: "#/definitions/UploadTrainResInfo"
+        x-exportParamName: "UploadTrainResInfo"
+      responses:
+        200:
+          description: "OK, send successfully"
+        500:
+          description: "error"
+definitions:
+  FilePath:
+    example: "D:\\go-ipfs\\ipfs.exe"
+  IPFSAddress:
+    type: "string"
+    example: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+  DataType:
+    type: "object"
+    required:
+    - "length"
+    - "name"
+    - "type"
+    properties:
+      name:
+        type: "string"
+        example: "pixels"
+        maxLength: 50
+      type:
+        type: "string"
+        example: "int"
+        enum:
+        - "int"
+        - "string"
+        - "float"
+        - "double"
+      length:
+        type: "integer"
+        example: 786
+  DataSchema:
+    type: "array"
+    items:
+      $ref: "#/definitions/DataType"
+    example:
+    - name: "pixels"
+      type: "int"
+      length: 786
+    - name: "picture name"
+      type: "char"
+      length: 30
+  MetaData:
+    type: "object"
+    required:
+    - "Attributes"
+    - "Average"
+    - "Variance"
+    properties:
+      Average:
+        type: "number"
+        format: "float"
+        example: 30.0
+      Variance:
+        type: "number"
+        format: "float"
+        example: 60.5
+      Attributes:
+        type: "array"
+        example:
+        - "handwriting picture"
+        - "number 1 - 9"
+        items:
+          type: "string"
+          maxLength: 100
+    description: "this model is to describe the QI of the data"
+  Strategy:
+    type: "object"
+    required:
+    - "OperationSchemaAddress"
+    - "StopConditionAddress"
+    - "TokenStrategyAddress"
+    properties:
+      OperationSchemaAddress:
+        $ref: "#/definitions/IPFSAddress"
+      StopConditionAddress:
+        $ref: "#/definitions/IPFSAddress"
+      TokenStrategyAddress:
+        $ref: "#/definitions/IPFSAddress"
+  OperationScehma:
+    type: "object"
+    required:
+    - "Method"
+    - "Number"
+    properties:
+      Method:
+        type: "string"
+        example: "train"
+        enum:
+        - "train"
+        - "Eval"
+      Number:
+        type: "integer"
+        example: 1000
+  StopCondition:
+    type: "object"
+    required:
+    - "Accuracy"
+    properties:
+      Accuracy:
+        type: "number"
+        format: "float"
+        example: 0.98
+  TokensStrategy:
+    type: "object"
+    required:
+    - "Strategy"
+    - "TotalTokens"
+    properties:
+      TotalTokens:
+        type: "number"
+        format: "float"
+        example: 1000.0
+      Strategy:
+        type: "string"
+        example: "by contribution"
+  TransactionInfo:
+    type: "object"
+    required:
+    - "ComputionAddress"
+    - "DataSchemaAddress"
+    - "MetadataAddress"
+    - "ModelAddress"
+    - "StrategyAddress"
+    properties:
+      DataSchemaAddress:
+        $ref: "#/definitions/IPFSAddress"
+      MetadataAddress:
+        $ref: "#/definitions/IPFSAddress"
+      ModelAddress:
+        $ref: "#/definitions/IPFSAddress"
+      StrategyAddress:
+        $ref: "#/definitions/IPFSAddress"
+      ComputionAddress:
+        $ref: "#/definitions/IPFSAddress"
+    example:
+      DataSchemaAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      MetadataAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      ComputionAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      ModelAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      StrategyAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+  TrasactionDetails:
+    type: "object"
+    required:
+    - "TaskId"
+    properties:
+      TaskId:
+        type: "integer"
+        example: 2
+  Payment:
+    type: "object"
+    required:
+    - "Payment"
+    properties:
+      Payment:
+        type: "number"
+        format: "float"
+        example: 100.0
+  BidDataInfo:
+    type: "object"
+    required:
+    - "DataSchemaAddress"
+    - "MataDataAddress"
+    - "PaymentAddress"
+    properties:
+      DataSchemaAddress:
+        $ref: "#/definitions/IPFSAddress"
+      MataDataAddress:
+        $ref: "#/definitions/IPFSAddress"
+      PaymentAddress:
+        $ref: "#/definitions/IPFSAddress"
+    example:
+      DataSchemaAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      MataDataAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      PaymentAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+  ComputerAttribute:
+    type: "object"
+    required:
+    - "CPU"
+    - "CoreNumber"
+    properties:
+      CPU:
+        type: "string"
+        example: "Intel(R) i5-6200U CPU @ 2.30GHz"
+        maxLength: 46
+      CoreNumber:
+        type: "integer"
+        example: 4
+  BidComputingInfo:
+    type: "object"
+    required:
+    - "ComputerAttributesAddress"
+    - "ComputingAddress"
+    - "OperationSchemasAddress"
+    - "PaymentAddress"
+    properties:
+      OperationSchemasAddress:
+        $ref: "#/definitions/IPFSAddress"
+      ComputingAddress:
+        $ref: "#/definitions/IPFSAddress"
+      PaymentAddress:
+        $ref: "#/definitions/IPFSAddress"
+      ComputerAttributesAddress:
+        $ref: "#/definitions/IPFSAddress"
+    example:
+      OperationSchemasAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      ComputingAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      ComputerAttributesAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      PaymentAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+  Key:
+    type: "object"
+    required:
+    - "AESPublicKey"
+    - "HomomorphicEncryPublicKey"
+    properties:
+      HomomorphicEncryPublicKey:
+        type: "string"
+        example: "homomorphic key"
+        maxLength: 1024
+      AESPublicKey:
+        type: "string"
+        example: "aes key"
+        maxLength: 1024
+  AskForDataInfo:
+    type: "object"
+    required:
+    - "DataSchemaAddress"
+    - "KeyAddress"
+    - "TrasactionDetailsAddress"
+    properties:
+      KeyAddress:
+        $ref: "#/definitions/IPFSAddress"
+      DataSchemaAddress:
+        $ref: "#/definitions/IPFSAddress"
+      TrasactionDetailsAddress:
+        $ref: "#/definitions/IPFSAddress"
+    example:
+      DataSchemaAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      KeyAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      TrasactionDetailsAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+  Argument:
+    type: "object"
+    required:
+    - "id"
+    - "value"
+    properties:
+      id:
+        type: "string"
+        example: "first layer arg1"
+      value:
+        type: "number"
+        format: "float"
+        example: 0.5
+  Reslut:
+    type: "object"
+    required:
+    - "Arguments"
+    - "CalculateTimes"
+    properties:
+      Arguments:
+        type: "array"
+        example:
+        - id: "first layer arg1"
+          value: 0.5
+        - id: "first layer arg2"
+          value: 1.3
+        items:
+          $ref: "#/definitions/Argument"
+      CalculateTimes:
+        type: "integer"
+        example: 10000
+  UploadTrainResInfo:
+    type: "object"
+    required:
+    - "TrainResultAddress"
+    - "TrasactionDetailsAddress"
+    properties:
+      TrainResultAddress:
+        $ref: "#/definitions/IPFSAddress"
+      TrasactionDetailsAddress:
+        $ref: "#/definitions/IPFSAddress"
+    example:
+      TrainResultAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"
+      TrasactionDetailsAddress: "QmTTJLQ2NPCWL5nbRxhLbt7Pd17NGZ6gY8n7CreUWo6muT"

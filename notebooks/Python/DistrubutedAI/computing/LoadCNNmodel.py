@@ -1,18 +1,25 @@
 from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("./MNIST_data",one_hot = True)
+# mnist = input_data.read_data_sets("./MNIST_data",one_hot = True)
 
 import tensorflow as tf
 import os
-
-batch_size = 100
+import numpy as np
+# 获取数据
+index = 2
+trainPath = '/Users/liulifeng/Desktop/Work/mnist_data/train_images/images'+str(index)
+trainData = np.loadtxt(trainPath)
+testPath = '/Users/liulifeng/Desktop/Work/mnist_data/test_images/test_images'+str(index)
+testData = np.loadtxt(trainPath)
+print("====>testData",len(testData))
+batch_size = 25
 display_step = 1
 #Network Parameters
 n_input = 784
 n_classes = 10
 
 #Parameters
-learning_rate = 0.1
-training_epochs = 5
+learning_rate = 0.0001
+training_epochs = 2
 
 #tf Graph input
 x = tf.placeholder("float",[None,n_input])
@@ -63,6 +70,10 @@ pred = multilayer_preceptron(x,weights,biases)
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred,labels=y))
 optimizer=tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
+# Calcuate accuracy
+correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+
 #create class Saver
 model_saver = tf.train.Saver()
 
@@ -78,29 +89,55 @@ with tf.Session() as sess:
     # Training cycle
     for epoch in range(training_epochs):
         avg_cost = 0.
-        total_batch = int(mnist.train.num_examples / batch_size)
+        # total_batch = int(mnist.train.num_examples / batch_size)
+        total_batch = int(len(trainData) / batch_size)
         # Loop over all batches
         for i in range(total_batch):
-            batch_x, batch_y = mnist.train.next_batch(batch_size)
+            # batch_x, batch_y = mnist.train.next_batch(batch_size)
+            start = i*batch_size
+            end = (i+1)*batch_size
+            if (i + 1) * batch_size > len(trainData):
+                end = len(trainData)
+            batchX = trainData[start: end]
+            labelArray = np.array([0, 0, 0., 0, 0, 0, 0, 0, 0, 0])
+            labelData = np.array([0, 0, 0., 0, 0, 0, 0, 0, 0, 0])
+            labelData[index] = labelArray[index] = 1.0
+            for _ in range(len(trainData) - 1):
+                labelData = np.vstack((labelData, labelArray))
+            batchY = labelData[start: end]
             # run optimization op (backprop)and cost op (to get loss value)
-            _, c = sess.run([optimizer, cost], feed_dict={x: batch_x, y: batch_y})
+            # _, c = sess.run([optimizer, cost], feed_dict={x: batch_x, y: batch_y})
+            _, c, correct = sess.run([optimizer, cost, accuracy], feed_dict={x: batchX, y: batchY})
             # Compute average loss
             avg_cost += c / total_batch
+            if i % 50 == 0:
+                print("=====>test:", '%04d' % i, "cost=", "{:.9f}".format(c))
+                print("<===correct:", correct)
             # Display logs per epoch step
         if epoch % display_step == 0:
             print("Epoch:", '%04d' % (epoch + 1), "cost=", "{:.9f}".format(avg_cost))
     print("Optimization Finished!")
-    correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
-    # Calcuate accuracy
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-    print("Accuracy:", accuracy.eval({x: mnist.test.images, y: mnist.test.labels}))
 
-    img=mnist.test.images[100].reshape(-1,784)
-    img_label=sess.run(tf.argmax(mnist.test.labels[100]))
+    labelArray = np.array([0, 0, 0., 0, 0, 0, 0, 0, 0, 0])
+    labelData = np.array([0, 0, 0., 0, 0, 0, 0, 0, 0, 0])
+    labelData[index] = labelArray[index] = 1.0
+    for _ in range(len(testData) - 1):
+        labelData = np.vstack((labelData, labelArray))
+    # print("Accuracy:", accuracy.eval({x: mnist.test.images, y: mnist.test.labels}))
+    print("labelData len:",len(labelData))
+    # print("====>testData",testData,"===>labelData",labelData)
+    print("Test Accuracy:", accuracy.eval({x: testData, y: labelData}))
+    # ----------------------------------------------------------
 
-    ret=sess.run(pred,feed_dict={x:img})
-    num_pred=sess.run(tf.argmax(ret,1))
+    # upload model and data
 
-    print("预测值:%d\n" % num_pred)
-    print("真实值:",img_label)
-    print("模型恢复成功")
+    # predict model
+    # img=mnist.test.images[100].reshape(-1,784)
+    # img_label=sess.run(tf.argmax(mnist.test.labels[100]))
+    #
+    # ret=sess.run(pred,feed_dict={x:img})
+    # num_pred=sess.run(tf.argmax(ret,1))
+    #
+    # print("预测值:%d\n" % num_pred)
+    # print("真实值:",img_label)
+    # print("模型恢复成功")

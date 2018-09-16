@@ -3,6 +3,9 @@ mnist = input_data.read_data_sets("./MNIST_data",one_hot = True)
 
 import tensorflow as tf
 import os
+import requests
+import hashlib
+import time
 #Parameters
 learning_rate = 0.1
 training_epochs = 5
@@ -92,7 +95,7 @@ with tf.Session() as sess:
     # correct_prediction=tf.equal(tf.argmax(pred,1),tf.argmax(y,1))
     # #Calcuate accuracy
     # accuracy = tf.reduce_mean(tf.cast(correct_prediction,"float"))
-    # print("Accuracy:",accuracy.eval({x:mnist.test.images,y:mnist.test.labels}))
+    # print("Accuracy:",accuracy.`({x:mnist.test.images,y:mnist.test.labels}))
     #create dir for model saver
     model_dir = "mnist"
     model_name = "cpk"
@@ -101,3 +104,28 @@ with tf.Session() as sess:
         os.makedirs(model_dir)
     model_saver.save(sess,os.path.join(model_dir,model_name))
     print("model saved sucessfully")
+
+# upload model and data
+# url = "http://text"
+# clientId = "1111"
+# clientKey = "2222"
+# timestap = (str)(int(round(time.time()*1000)))
+# clientSecret = hashlib.sha256(clientId.encode("utf-8") + clientKey.encode("utf-8") + timestap.encode("utf-8"))
+#
+# header = {'clientId': clientId, 'timestap': timestap, 'clientSecret': clientSecret}
+# files = {'zip':open('~/Workspaces/DistributedAI/notebooks/Python/DistrubutedAI/computing/mnist.zip','rb')}
+# data = {'enctype': 'multipart/form-data', 'name': 'liu'}
+# reponse = requests.post(url, data=data, header=header, files=files)
+# text = reponse.text
+# print(text)
+#
+# # 模型方：获取10个经过训练的模型参数，进行加权平均
+# # 加权平均
+# def averageWeight(nums, weights, biases):
+#
+#     pass
+#
+# def federatingLearning(nums, weights, biases):
+#     # average
+#     averageWeight(nums, weights, biases)
+#     pass

@@ -4,13 +4,13 @@ from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
 import os
 import numpy as np
-# 获取数据
+# 获取数据， 模型
 index = 2
 trainPath = '/Users/liulifeng/Desktop/Work/mnist_data/train_images/images'+str(index)
 trainData = np.loadtxt(trainPath)
 testPath = '/Users/liulifeng/Desktop/Work/mnist_data/test_images/test_images'+str(index)
 testData = np.loadtxt(trainPath)
-print("====>testData",len(testData))
+# print("====>testData",len(testData))
 batch_size = 25
 display_step = 1
 #Network Parameters
@@ -75,15 +75,31 @@ correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
 #create class Saver
-model_saver = tf.train.Saver()
+saver = tf.train.Saver()
+
+# 在下面的代码中，默认加载了TensorFlow计算图上定义的全部变量
+# 直接加载持久化的图
+# saver = tf.train.import_meta_graph("mnist/cpk.meta")
+# download mdoel data path
+# downModelLoadPath = "/Users/liulifeng/Desktop/Work/uploadIpfs/model/"
+# saver = tf.train.import_meta_graph(downModelLoadPath+"model_save.meta")
 
 #Launch the gtrph
 with tf.Session() as sess:
-    #create dir for model saver
-    model_dir = "mnist"
+    # create dir for model saver
+    # model_dir = "mnist"
+    # model_name = "cpk"
+    # model_path=os.path.join(model_dir,model_name)
+    # saver.restore(sess,model_path)
+
+    model_dir = "/Users/liulifeng/Desktop/Work/uploadIpfs/downloadMnist/"
     model_name = "cpk"
-    model_path=os.path.join(model_dir,model_name)
-    model_saver.restore(sess,model_path)
+    model_path = os.path.join(model_dir, model_name)
+    saver.restore(sess, model_path)
+
+
+    # saver.restore(sess, "mnist/cpk.index")
+    # saver.restore(sess, downModelLoadPath+"model_save.index")
 
     # ----------------------------------------------------------
     # Training cycle

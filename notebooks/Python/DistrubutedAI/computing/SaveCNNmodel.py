@@ -63,7 +63,7 @@ biases={
     'fc1_b':tf.Variable(tf.random_normal([256])),
     'out_b':tf.Variable(tf.random_normal([n_classes]))
 }
-#Construct model
+# 1. Construct model
 pred = multilayer_preceptron(x,weights,biases)
 
 #Define loss and optimizer
@@ -71,7 +71,7 @@ cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred,labels
 optimizer=tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 #Initializing the variables
 init = tf.global_variables_initializer()
-#saver model
+# 2. Saver model
 model_saver = tf.train.Saver()
 
 #Launch the gtrph
@@ -96,16 +96,16 @@ with tf.Session() as sess:
     # #Calcuate accuracy
     # accuracy = tf.reduce_mean(tf.cast(correct_prediction,"float"))
     # print("Accuracy:",accuracy.`({x:mnist.test.images,y:mnist.test.labels}))
+
     #create dir for model saver
     model_dir = "mnist"
     model_name = "cpk"
-
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
     model_saver.save(sess,os.path.join(model_dir,model_name))
     print("model saved sucessfully")
 
-# upload model and data
+# 3. upload model and data 多轮上传模型，数据？ round1, 2, 3?
 # url = "http://text"
 # clientId = "1111"
 # clientKey = "2222"
@@ -122,10 +122,12 @@ with tf.Session() as sess:
 # # 模型方：获取10个经过训练的模型参数，进行加权平均
 # # 加权平均
 # def averageWeight(nums, weights, biases):
-#
-#     pass
+#     average_weights = sum(weights) / len(weights)
+#     average_biases = sum(weights) / len(biases)
+#     return average_weights, average_biases
 #
 # def federatingLearning(nums, weights, biases):
 #     # average
-#     averageWeight(nums, weights, biases)
+#     average_weights, average_biases = averageWeight(nums, weights, biases)
+#     return average_weights, average_biases
 #     pass

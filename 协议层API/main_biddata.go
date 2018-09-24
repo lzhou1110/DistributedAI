@@ -37,38 +37,38 @@ const key=`{"address":"a26ef2ded2fad7f9462d2d60e928a27bb96db252","crypto":{"ciph
 
 
 func main() {
-  const address ="0x55dfabfa447441b728d747319aa2f1662beb703f"
+  //const address ="0xd50ebd8c3f659b65aa642b21f268df538fb2a2bc"
   //const address2="0xb0e6867aae16331236e5954804a51b6a0d2b2cbd" //bidcomputing
-  //const address3="0x246eda5ecf5349e8aed2f50033a4ed9af7a827b4" //biddata
+  const address3="0x726b7e35130df9121584858712bf7ae6d2cc3ef1" //biddata
   //const key = "//Users//huyifan//go-ethereum//build//bin//data/UTC--2018-09-17T12-53-35.996167402Z--020301d472a3533f3785f62601a9304a87a52788"
-  //conn, err := ethclient.Dial("http://36.26.80.184:8546")
-  conn, err := ethclient.Dial("/Users/huyifan/go-ethereum/build/bin/data/geth.ipc")
+  conn, err := ethclient.Dial("/root/eth/go-ethereum/build/bin/chain/geth.ipc")
+  //conn, err := ethclient.Dial("/Users/huyifan/go-ethereum/build/bin/data/geth.ipc")
   fmt.Println("connect to local geth node...",conn)
   if err != nil {
       log.Fatalf("could not connect to local node: %v", err)
   }
   fmt.Println("get the contract object...")
   //ballot2 contract
-  token, err := NewMain2(common.HexToAddress(address), conn)
+  /*token, err := NewMain2(common.HexToAddress(address), conn)
    if err != nil {
        log.Fatalf("Failed to instantiate a Token contract: %v", err)
    }
-   fmt.Println("contract token======>:",token)
+   fmt.Println("contract token======>:",token)*/
    //fmt.Println("get the auth.....")
    //bidcomputing contract
    /*token2, err := NewMain3(common.HexToAddress(address2), conn)
     if err != nil {
         log.Fatalf("Failed to instantiate a Token contract: %v", err)
     }
-    fmt.Println("contract token2======>:",token2)
+    fmt.Println("contract token2======>:",token2)*/
 
 
     //biddata contract
-    token3, err := NewMain4(common.HexToAddress(address), conn)
+    token3, err := NewMain4(common.HexToAddress(address3), conn)
      if err != nil {
          log.Fatalf("Failed to instantiate a Token contract: %v", err)
      }
-     fmt.Println("contract token3======>:",token3)*/
+     fmt.Println("contract token3======>:",token3)
 
      fmt.Println("get the auth.....")
    auth, err := bind.NewTransactor(strings.NewReader(key), "abc")
@@ -79,7 +79,7 @@ func main() {
     alloc[auth.From] = core.GenesisAccount{Balance: big.NewInt(1337000000000)}
     sim := backends.NewSimulatedBackend(alloc,100000000)
    // fmt.Println("token:=====>",token)
-  _,err=token.Add2Ipfspool(&bind.TransactOpts{
+  /*_,err=token.Add2Ipfspool(&bind.TransactOpts{
 		From:     auth.From,
 		Signer:   auth.Signer,
 		GasLimit: 238162,
@@ -122,12 +122,12 @@ func main() {
    log.Fatalf("get balance err:%v", err)
  }
  fmt.Println("the balance is %d: ",returnedBalance)
-
+*/
 
 //sim.Commit()
 
-
-  /*fmt.Println("=====test bidcomputing=====")
+/*
+  fmt.Println("=====test bidcomputing=====")
 
   token2.AskTraining(&bind.TransactOpts{
    From:     auth.From,
@@ -139,7 +139,7 @@ func main() {
  sim.Commit()
 
  info_res1,_:=token2.Status(&bind.CallOpts{})
-fmt.Println("test bidcomuting askTraing result: ", info_res1)
+fmt.Println("test bidcomuting askTraing result: ", info_res1)*/
 
 
 
@@ -152,9 +152,11 @@ fmt.Println("test bidcomuting askTraing result: ", info_res1)
    GasLimit: 238162,
    Value:    big.NewInt(10),
   })
+
+  fmt.Println("Mining...")
   sim.Commit()
   info_res2,_:=token3.Status(&bind.CallOpts{})
-  fmt.Println("test biddata buydata result:  ", info_res2)*/
+  fmt.Println("test biddata buydata result:  ", info_res2)
 
   //fmt.Println("test biddata data: %v\n", returnedBuyData)
 

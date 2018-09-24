@@ -4,14 +4,15 @@ from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
 import os
 import numpy as np
+import pickle
 # 获取数据， 模型
-index = 2
+index = 9
 trainPath = '/Users/liulifeng/Desktop/Work/mnist_data/train_images/images'+str(index)
 trainData = np.loadtxt(trainPath)
 testPath = '/Users/liulifeng/Desktop/Work/mnist_data/test_images/test_images'+str(index)
-testData = np.loadtxt(trainPath)
+testData = np.loadtxt(testPath)
 # print("====>testData",len(testData))
-batch_size = 25
+batch_size = 20
 display_step = 1
 #Network Parameters
 n_input = 784
@@ -52,16 +53,16 @@ def multilayer_preceptron(x,weights,biases):
     return out_layer
 
 weights={
-    'conv1':tf.Variable(tf.random_normal([5,5,1,32])),
-    'conv2':tf.Variable(tf.random_normal([5,5,32,64])),
-    'fc1':tf.Variable(tf.random_normal([7*7*64,256])),
-    'out':tf.Variable(tf.random_normal([256,n_classes]))
+    'conv1':tf.Variable(tf.random_normal([5,5,1,32]), name = 'conv1'),
+    'conv2':tf.Variable(tf.random_normal([5,5,32,64]), name = 'conv2'),
+    'fc1':tf.Variable(tf.random_normal([7*7*64,256]), name = 'fc1'),
+    'out':tf.Variable(tf.random_normal([256,n_classes]), name = 'out')
 }
 biases={
-    'conv_b1':tf.Variable(tf.random_normal([32])),
-    'conv_b2':tf.Variable(tf.random_normal([64])),
-    'fc1_b':tf.Variable(tf.random_normal([256])),
-    'out_b':tf.Variable(tf.random_normal([n_classes]))
+    'conv_b1':tf.Variable(tf.random_normal([32]), name = 'conv_b1'),
+    'conv_b2':tf.Variable(tf.random_normal([64]), name = 'conv_b2'),
+    'fc1_b':tf.Variable(tf.random_normal([256]), name = 'fc1_b'),
+    'out_b':tf.Variable(tf.random_normal([n_classes]), name = 'out_b')
 }
 #Construct model
 pred = multilayer_preceptron(x,weights,biases)
@@ -73,16 +74,17 @@ optimizer=tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 # Calcuate accuracy
 correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-
+init_op = tf.global_variables_initializer()
 #create class Saver
-saver = tf.train.Saver()
+# saver = tf.train.Saver()
 
 # 在下面的代码中，默认加载了TensorFlow计算图上定义的全部变量
 # 直接加载持久化的图
 # saver = tf.train.import_meta_graph("mnist/cpk.meta")
 # download mdoel data path
-# downModelLoadPath = "/Users/liulifeng/Desktop/Work/uploadIpfs/model/"
-# saver = tf.train.import_meta_graph(downModelLoadPath+"model_save.meta")
+downModelLoadPath = "./downloadModel/"
+saver = tf.train.import_meta_graph(downModelLoadPath+"cpk.meta")
+
 
 #Launch the gtrph
 with tf.Session() as sess:
@@ -91,15 +93,43 @@ with tf.Session() as sess:
     # model_name = "cpk"
     # model_path=os.path.join(model_dir,model_name)
     # saver.restore(sess,model_path)
+    init = sess.run(init_op)
 
-    model_dir = "/Users/liulifeng/Desktop/Work/uploadIpfs/downloadMnist/"
+    model_dir = "./downloadModel"
     model_name = "cpk"
     model_path = os.path.join(model_dir, model_name)
     saver.restore(sess, model_path)
 
+    # 输出文件
+    conv1 = sess.run(tf.get_default_graph().get_tensor_by_name("conv1:0"))
+    conv2 = sess.run(tf.get_default_graph().get_tensor_by_name("conv2:0"))
+    fc1 = sess.run(tf.get_default_graph().get_tensor_by_name("fc1:0"))
+    out = sess.run(tf.get_default_graph().get_tensor_by_name("out:0"))
+    conv_b1 = sess.run(tf.get_default_graph().get_tensor_by_name("conv_b1:0"))
+    conv_b2 = sess.run(tf.get_default_graph().get_tensor_by_name("conv_b2:0"))
+    fc1_b = sess.run(tf.get_default_graph().get_tensor_by_name("fc1_b:0"))
+    out_b = sess.run(tf.get_default_graph().get_tensor_by_name("out_b:0"))
+    weightsAndBiases0 = {
+        "conv1": conv1,
+        "conv2": conv2,
+        "fc1": fc1,
+        "out": out,
+        "conv_b1": conv_b1,
+        "conv_b2": conv_b2,
+        "fc1_b": fc1_b,
+        "out_b": out_b,
+    }
+    with open("initialData.pickle", 'wb') as f:
+        pickle.dump(weightsAndBiases0, f, pickle.HIGHEST_PROTOCOL)
 
-    # saver.restore(sess, "mnist/cpk.index")
-    # saver.restore(sess, downModelLoadPath+"model_save.index")
+    temp_conv1 = 0,
+    temp_conv2 = 0,
+    temp_fc1 = 0,
+    temp_out = 0,
+    temp_conv_b1 = 0,
+    temp_conv_b2 = 0,
+    temp_fc1_b = 0,
+    temp_out_b = 0,
 
     # ----------------------------------------------------------
     # Training cycle
@@ -126,13 +156,68 @@ with tf.Session() as sess:
             _, c, correct = sess.run([optimizer, cost, accuracy], feed_dict={x: batchX, y: batchY})
             # Compute average loss
             avg_cost += c / total_batch
-            if i % 50 == 0:
+            if i % 5 == 0:
                 print("=====>test:", '%04d' % i, "cost=", "{:.9f}".format(c))
                 print("<===correct:", correct)
             # Display logs per epoch step
         if epoch % display_step == 0:
             print("Epoch:", '%04d' % (epoch + 1), "cost=", "{:.9f}".format(avg_cost))
+        print("<=========================>")
+        # 输出文件
+        conv1 = sess.run(tf.get_default_graph().get_tensor_by_name("conv1:0"))
+        conv2 = sess.run(tf.get_default_graph().get_tensor_by_name("conv2:0"))
+        fc1 = sess.run(tf.get_default_graph().get_tensor_by_name("fc1:0"))
+        out = sess.run(tf.get_default_graph().get_tensor_by_name("out:0"))
+        conv_b1 = sess.run(tf.get_default_graph().get_tensor_by_name("conv_b1:0"))
+        conv_b2 = sess.run(tf.get_default_graph().get_tensor_by_name("conv_b2:0"))
+        fc1_b = sess.run(tf.get_default_graph().get_tensor_by_name("fc1_b:0"))
+        out_b = sess.run(tf.get_default_graph().get_tensor_by_name("out_b:0"))
+        print("第%d个epoch ", epoch)
+        weightsAndBiases = {
+            "conv1": conv1,
+            "conv2": conv2,
+            "fc1": fc1,
+            "out": out,
+            "conv_b1": conv_b1,
+            "conv_b2": conv_b2,
+            "fc1_b": fc1_b,
+            "out_b": out_b,
+        }
+
+        temp_conv1 += conv1/2
+        temp_conv2 += conv2/2
+        temp_fc1 += fc1/2
+        temp_out += out/2
+        temp_conv_b1 += conv_b1/2
+        temp_conv_b2 += conv_b2/2
+        temp_fc1_b += fc1_b/2
+        temp_out_b += out_b/2
+
+        if epoch == 0:
+            with open("firstEpoch.pickle", 'wb') as f:
+                pickle.dump(weightsAndBiases, f, pickle.HIGHEST_PROTOCOL)
+        else:
+            with open("SecondEpoch.pickle", 'wb') as f:
+                pickle.dump(weightsAndBiases, f, pickle.HIGHEST_PROTOCOL)
+            TempweightsAndBiases = {
+                "conv1": temp_conv1,
+                "conv2": temp_conv2,
+                "fc1": temp_fc1,
+                "out": temp_out,
+                "conv_b1": temp_conv_b1,
+                "conv_b2": temp_conv_b2,
+                "fc1_b": temp_fc1_b,
+                "out_b": temp_out_b,
+            }
+            with open("allEpoch.pickle", 'wb') as f:
+                pickle.dump(TempweightsAndBiases, f, pickle.HIGHEST_PROTOCOL)
+
+        # with open("data.pickle", 'rb') as f:
+        #     data = pickle.load(f)
+        #     print("---------->len:",len(data["conv1"]))
+
     print("Optimization Finished!")
+
 
     labelArray = np.array([0, 0, 0., 0, 0, 0, 0, 0, 0, 0])
     labelData = np.array([0, 0, 0., 0, 0, 0, 0, 0, 0, 0])
@@ -145,7 +230,15 @@ with tf.Session() as sess:
     print("Test Accuracy:", accuracy.eval({x: testData, y: labelData}))
     # ----------------------------------------------------------
 
-    # upload model and data
+    # upload finished training model and data
+    # finishedModel_saver = tf.train.Saver(var_list=tf.global_variables())
+    # create dir for model saver
+    model_dir = "trainedModel"
+    model_name = "cpk"
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+    saver.save(sess, os.path.join(model_dir, model_name))
+    print("trainedModel saved sucessfully")
 
     # predict model
     # img=mnist.test.images[100].reshape(-1,784)

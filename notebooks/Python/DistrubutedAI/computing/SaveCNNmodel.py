@@ -1,5 +1,5 @@
 from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("./MNIST_data",one_hot = True)
+# mnist = input_data.read_data_sets("./MNIST_data",one_hot = True)
 
 import tensorflow as tf
 import os
@@ -72,7 +72,7 @@ optimizer=tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 #Initializing the variables
 init = tf.global_variables_initializer()
 # 2. Saver model
-model_saver = tf.train.Saver()
+model_saver = tf.train.Saver(var_list=tf.global_variables())
 
 #Launch the gtrph
 with tf.Session() as sess:
@@ -98,7 +98,7 @@ with tf.Session() as sess:
     # print("Accuracy:",accuracy.`({x:mnist.test.images,y:mnist.test.labels}))
 
     #create dir for model saver
-    model_dir = "mnist"
+    model_dir = "uploadModel"
     model_name = "cpk"
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)

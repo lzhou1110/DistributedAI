@@ -2,9 +2,11 @@
 Tensorflow 实现简单CNN
 '''
 import tensorflow as tf
+import numpy as np
 from tensorflow.examples.tutorials.mnist import input_data
 
-mnist = input_data.read_data_sets('./MNIST_data', one_hot=True)
+# mnist = input_data.read_data_sets('./MNIST_data', one_hot=True)
+imageData = np.loadtxt('/Users/liulifeng/Desktop/Work/mnist_data/image/images2')
 # 建立会话
 sess = tf.InteractiveSession()
 
@@ -80,11 +82,25 @@ model_save_path = "./model/model_save"
 saver = tf.train.Saver()
 saver.save(sess, model_save_path)
 
-for i in range(20000):
-    batch = mnist.train.next_batch(50)
-    if i % 100 == 0:
-        train_accuracy = sess.run(accuracy, feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.1})
+for i in range(100):
+    # batch = mnist.train.next_batch(50)
+    batchSize = 50
+    start = i*50
+    end = (i+1)*50
+    if (i+1)*50 > len(imageData):
+        end = len(imageData)
+    batchX = imageData[start : end]
+
+    labelArray = np.array([0,0,1.,0,0,0,0,0,0,0])
+    labelData = np.array([0,0,1.,0,0,0,0,0,0,0])
+    for _ in range(len(imageData)):
+        labelData = np.vstack((labelData, labelArray))
+    batchY = labelData[start : end]
+    if i % 10 == 0:
+        # print("i:",i, "batch[0]:", batch[0], "batch[1]:", batch[1])
+        # print(len(batch[0]))
+        train_accuracy = sess.run(accuracy, feed_dict={x: batchX, y_: batchY, keep_prob: 0.1})
         print('step %d, training accuracy %g' % (i, train_accuracy))
 
-    sess.run(train_step, feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
-print('test accuracy %g' % sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
+    sess.run(train_step, feed_dict={x: batchX, y_: batchY, keep_prob: 0.5})
+# print('test accuracy %g' % sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))

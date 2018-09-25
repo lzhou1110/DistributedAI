@@ -172,7 +172,7 @@ with tf.Session() as sess:
         conv_b2 = sess.run(tf.get_default_graph().get_tensor_by_name("conv_b2:0"))
         fc1_b = sess.run(tf.get_default_graph().get_tensor_by_name("fc1_b:0"))
         out_b = sess.run(tf.get_default_graph().get_tensor_by_name("out_b:0"))
-        print("第%d个epoch ", epoch)
+        print("第%d个epoch " % epoch)
         weightsAndBiases = {
             "conv1": conv1,
             "conv2": conv2,
@@ -211,14 +211,7 @@ with tf.Session() as sess:
             }
             with open("allEpoch.pickle", 'wb') as f:
                 pickle.dump(TempweightsAndBiases, f, pickle.HIGHEST_PROTOCOL)
-
-        # with open("data.pickle", 'rb') as f:
-        #     data = pickle.load(f)
-        #     print("---------->len:",len(data["conv1"]))
-
     print("Optimization Finished!")
-
-
     labelArray = np.array([0, 0, 0., 0, 0, 0, 0, 0, 0, 0])
     labelData = np.array([0, 0, 0., 0, 0, 0, 0, 0, 0, 0])
     labelData[index] = labelArray[index] = 1.0

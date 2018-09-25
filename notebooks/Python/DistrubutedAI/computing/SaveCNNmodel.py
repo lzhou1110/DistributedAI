@@ -3,6 +3,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 import tensorflow as tf
 import os
+import pickle
 import requests
 import hashlib
 import time
@@ -103,7 +104,7 @@ with tf.Session() as sess:
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
     model_saver.save(sess,os.path.join(model_dir,model_name))
-    print("model saved sucessfully")
+    print("model saved sucessfully!! the path is in flie uploadModel")
 
 # 3. upload model and data 多轮上传模型，数据？ round1, 2, 3?
 # url = "http://text"
@@ -119,15 +120,21 @@ with tf.Session() as sess:
 # text = reponse.text
 # print(text)
 #
-# # 模型方：获取10个经过训练的模型参数，进行加权平均
-# # 加权平均
-# def averageWeight(nums, weights, biases):
-#     average_weights = sum(weights) / len(weights)
-#     average_biases = sum(weights) / len(biases)
-#     return average_weights, average_biases
-#
-# def federatingLearning(nums, weights, biases):
-#     # average
-#     average_weights, average_biases = averageWeight(nums, weights, biases)
-#     return average_weights, average_biases
-#     pass
+# 模型方：获取10个经过训练的模型参数，进行加权平均
+# 加权平均
+# read trained CNN model
+def readAllEpoch():
+    with open("allEpoch.pickle", 'rb') as f:
+        data = pickle.load(f)
+    print("---------->len:",len(data["conv1"]))
+
+def averageWeight(nums, weights, biases):
+    average_weights = sum(weights) / len(weights)
+    average_biases = sum(weights) / len(biases)
+    return average_weights, average_biases
+
+def federatingLearning(nums, weights, biases):
+    # average
+    average_weights, average_biases = averageWeight(nums, weights, biases)
+    return average_weights, average_biases
+    pass

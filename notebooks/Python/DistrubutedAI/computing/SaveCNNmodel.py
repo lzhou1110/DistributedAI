@@ -4,6 +4,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
 import os
 import pickle
+import numpy as np
 import requests
 import hashlib
 import time
@@ -53,16 +54,16 @@ def multilayer_preceptron(x,weights,biases):
     return out_layer
 
 weights={
-    'conv1':tf.Variable(tf.random_normal([5,5,1,32])),
-    'conv2':tf.Variable(tf.random_normal([5,5,32,64])),
-    'fc1':tf.Variable(tf.random_normal([7*7*64,256])),
-    'out':tf.Variable(tf.random_normal([256,n_classes]))
+    'conv1':tf.Variable(tf.random_normal([5,5,1,32]), name = 'conv1'),
+    'conv2':tf.Variable(tf.random_normal([5,5,32,64]), name = 'conv2'),
+    'fc1':tf.Variable(tf.random_normal([7*7*64,256]), name = 'fc1'),
+    'out':tf.Variable(tf.random_normal([256,n_classes]), name = 'out')
 }
 biases={
-    'conv_b1':tf.Variable(tf.random_normal([32])),
-    'conv_b2':tf.Variable(tf.random_normal([64])),
-    'fc1_b':tf.Variable(tf.random_normal([256])),
-    'out_b':tf.Variable(tf.random_normal([n_classes]))
+    'conv_b1':tf.Variable(tf.random_normal([32]), name = 'conv_b1'),
+    'conv_b2':tf.Variable(tf.random_normal([64]), name = 'conv_b2'),
+    'fc1_b':tf.Variable(tf.random_normal([256]), name = 'fc1_b'),
+    'out_b':tf.Variable(tf.random_normal([n_classes]), name = 'out_b')
 }
 # 1. Construct model
 pred = multilayer_preceptron(x,weights,biases)
@@ -73,39 +74,23 @@ optimizer=tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 #Initializing the variables
 init = tf.global_variables_initializer()
 # 2. Saver model
-model_saver = tf.train.Saver(var_list=tf.global_variables())
+model_saver = tf.train.Saver()
+
+def readAllEpoch():
+    with open("allEpoch.pickle", 'rb') as f:
+        data = pickle.load(f)
+    print("---------->len:",data["conv1"])
 
 #Launch the gtrph
 with tf.Session() as sess:
     sess.run(init)
-    #Training cycle
-    # for epoch in range(training_epochs):
-    #     avg_cost=0.
-    #     total_batch=int(mnist.train.num_examples/batch_size)
-    #     #Loop over all batches
-    #     for i in range(total_batch):
-    #         batch_x,batch_y=mnist.train.next_batch(batch_size)
-    #         #run optimization op (backprop)and cost op (to get loss value)
-    #         _,c=sess.run([optimizer,cost],feed_dict={x:batch_x,y:batch_y})
-    #         #Compute average loss
-    #         avg_cost+=c/total_batch
-    #         #Display logs per epoch step
-    #     if epoch % display_step==0:
-    #         print("Epoch:",'%04d' % (epoch+1),"cost=","{:.9f}".format(avg_cost))
-    # print("Optimization Finished!")
-    # correct_prediction=tf.equal(tf.argmax(pred,1),tf.argmax(y,1))
-    # #Calcuate accuracy
-    # accuracy = tf.reduce_mean(tf.cast(correct_prediction,"float"))
-    # print("Accuracy:",accuracy.`({x:mnist.test.images,y:mnist.test.labels}))
-
-    #create dir for model saver
     model_dir = "uploadModel"
     model_name = "cpk"
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
     model_saver.save(sess,os.path.join(model_dir,model_name))
     print("model saved sucessfully!! the path is in flie uploadModel")
-
+    # readAllEpoch()
 # 3. upload model and data 多轮上传模型，数据？ round1, 2, 3?
 # url = "http://text"
 # clientId = "1111"
@@ -123,10 +108,10 @@ with tf.Session() as sess:
 # 模型方：获取10个经过训练的模型参数，进行加权平均
 # 加权平均
 # read trained CNN model
-def readAllEpoch():
-    with open("allEpoch.pickle", 'rb') as f:
-        data = pickle.load(f)
-    print("---------->len:",len(data["conv1"]))
+# def readAllEpoch():
+#     with open("allEpoch.pickle", 'rb') as f:
+#         data = pickle.load(f)
+#     print("---------->len:",len(data["conv1"]))
 
 def averageWeight(nums, weights, biases):
     average_weights = sum(weights) / len(weights)
@@ -137,4 +122,45 @@ def federatingLearning(nums, weights, biases):
     # average
     average_weights, average_biases = averageWeight(nums, weights, biases)
     return average_weights, average_biases
+    pass
+
+# 读取本地所有模型
+def readModel(path):
+    init_op = tf.global_variables_initializer()
+
+    model_saver = tf.train.Saver()
+    # Launch the gtrph
+    with tf.Session() as sess:
+        # create dir for model saver
+        init = sess.run(init_op)
+        model_dir = "./"+path
+        model_name = "cpk"
+        model_path = os.path.join(model_dir, model_name)
+        model_saver.restore(sess, model_path)
+        conv1 = sess.run(tf.get_default_graph().get_tensor_by_name("conv1:0"))
+        conv2 = sess.run(tf.get_default_graph().get_tensor_by_name("conv2:0"))
+        fc1 = sess.run(tf.get_default_graph().get_tensor_by_name("fc1:0"))
+        out = sess.run(tf.get_default_graph().get_tensor_by_name("out:0"))
+        conv_b1 = sess.run(tf.get_default_graph().get_tensor_by_name("conv_b1:0"))
+        conv_b2 = sess.run(tf.get_default_graph().get_tensor_by_name("conv_b2:0"))
+        fc1_b = sess.run(tf.get_default_graph().get_tensor_by_name("fc1_b:0"))
+        out_b = sess.run(tf.get_default_graph().get_tensor_by_name("out_b:0"))
+        weightsAndBiases = {
+            "conv1": conv1,
+            "conv2": conv2,
+            "fc1": fc1,
+            "out": out,
+            "conv_b1": conv_b1,
+            "conv_b2": conv_b2,
+            "fc1_b": fc1_b,
+            "out_b": out_b,
+        }
+        # print(weightsAndBiases)
+        return weightsAndBiases
+if __name__ == "__main__":
+    modelList = np.array(["trainedModel", "uploadModel", "downloadModel"])
+    for index in range(len(modelList)):
+        print("============================>")
+        weightsAndBiases = readModel(modelList[index])
+        print(weightsAndBiases)
     pass

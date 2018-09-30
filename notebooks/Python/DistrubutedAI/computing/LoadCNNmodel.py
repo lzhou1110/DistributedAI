@@ -82,8 +82,9 @@ init_op = tf.global_variables_initializer()
 # 直接加载持久化的图
 # saver = tf.train.import_meta_graph("mnist/cpk.meta")
 # download mdoel data path
-downModelLoadPath = "./downloadModel/"
-saver = tf.train.import_meta_graph(downModelLoadPath+"cpk.meta")
+
+downModelLoadPath = "./downloadModel"
+saver = tf.train.import_meta_graph(downModelLoadPath+"/cpk.meta")
 
 
 #Launch the gtrph
@@ -95,7 +96,7 @@ with tf.Session() as sess:
     # saver.restore(sess,model_path)
     init = sess.run(init_op)
 
-    model_dir = "./downloadModel"
+    model_dir = downModelLoadPath
     model_name = "cpk"
     model_path = os.path.join(model_dir, model_name)
     saver.restore(sess, model_path)
@@ -109,7 +110,7 @@ with tf.Session() as sess:
     conv_b2 = sess.run(tf.get_default_graph().get_tensor_by_name("conv_b2:0"))
     fc1_b = sess.run(tf.get_default_graph().get_tensor_by_name("fc1_b:0"))
     out_b = sess.run(tf.get_default_graph().get_tensor_by_name("out_b:0"))
-    weightsAndBiases0 = {
+    weightsAndBiases = {
         "conv1": conv1,
         "conv2": conv2,
         "fc1": fc1,
@@ -120,7 +121,7 @@ with tf.Session() as sess:
         "out_b": out_b,
     }
     with open("initialData.pickle", 'wb') as f:
-        pickle.dump(weightsAndBiases0, f, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(weightsAndBiases, f, pickle.HIGHEST_PROTOCOL)
 
     temp_conv1 = 0,
     temp_conv2 = 0,
@@ -151,8 +152,6 @@ with tf.Session() as sess:
             for _ in range(len(trainData) - 1):
                 labelData = np.vstack((labelData, labelArray))
             batchY = labelData[start: end]
-            # run optimization op (backprop)and cost op (to get loss value)
-            # _, c = sess.run([optimizer, cost], feed_dict={x: batch_x, y: batch_y})
             _, c, correct = sess.run([optimizer, cost, accuracy], feed_dict={x: batchX, y: batchY})
             # Compute average loss
             avg_cost += c / total_batch
@@ -224,7 +223,6 @@ with tf.Session() as sess:
     # ----------------------------------------------------------
 
     # upload finished training model and data
-    # finishedModel_saver = tf.train.Saver(var_list=tf.global_variables())
     # create dir for model saver
     model_dir = "trainedModel"
     model_name = "cpk"

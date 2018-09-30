@@ -1,0 +1,84 @@
+Get the ipfshash : QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF
+Get the filename: KeyFile
+Get the ipfsHash_des: QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF:abc
+run error: %v
+exec: already startedinteract with smart contract successfully!
+output: connect to local geth node... &{0xc420105340}
+get the auth.....
+get the contract object...
+contract token======>: &{{0xc4200c34a0} {0xc4200c34a0} {0xc4200c34a0}}
+Mining...
+File's Ipfs hash is: %v
+ 
+IPFS Hash of uploaded file:  
+Mining...
+the balance is %d:  0
+
+Get the ipfshash : QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF
+Get the filename: KeyFile
+Get the ipfsHash_des: QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF:abc
+run error: %v
+exec: already startedinteract with smart contract successfully!
+output: connect to local geth node... &{0xc42010b340}
+get the auth.....
+get the contract object...
+contract token======>: &{{0xc4200c9540} {0xc4200c9540} {0xc4200c9540}}
+Mining...
+File's Ipfs hash is: %v
+ QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF:abc
+IPFS Hash of uploaded file:  
+Mining...
+the balance is %d:  306
+
+Get the ipfshash : QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF
+Get the filename: KeyFile
+Get the ipfsHash_des: QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF:abc
+get the command line output fail: exit status 1run error: %v
+exec: already startedinteract with smart contract successfully!
+output: connect to local geth node... <nil>
+
+Get the ipfshash : QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF
+Get the filename: KeyFile
+Get the ipfsHash_des: QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF:abc
+run error: %v
+exec: already startedinteract with smart contract successfully!
+output: connect to local geth node... &{0xc4200f1340}
+get the auth.....
+get the contract object...
+contract token======>: &{{0xc4200b34a0} {0xc4200b34a0} {0xc4200b34a0}}
+Mining...
+File's Ipfs hash is: %v
+ QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF:abc
+IPFS Hash of uploaded file:  
+Mining...
+the balance is 1020: 
+Get the ipfshash : QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF
+Get the filename: KeyFile
+Get the ipfsHash_des: QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF:abc
+run error: %v
+exec: already startedinteract with smart contract successfully!
+output: connect to local geth node... &{0xc420101340}
+get the auth.....
+get the contract object...
+contract token======>: &{{0xc4200c35e0} {0xc4200c35e0} {0xc4200c35e0}}
+Mining...
+File's Ipfs hash is: %v
+ QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF:abc
+IPFS Hash of uploaded file:  
+Mining...
+the balance is 1122: 
+Get the ipfshash : QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF
+Get the filename: KeyFile
+Get the ipfsHash_des: QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF:abc
+run error: %v
+exec: already startedinteract with smart contract successfully!
+output: connect to local geth node... &{0xc420105340}
+get the auth.....
+get the contract object...
+contract token======>: &{{0xc4200c35e0} {0xc4200c35e0} {0xc4200c35e0}}
+Mining...
+File's Ipfs hash is: %v
+ QmPkQySUCQuwFvKjQ128prBd5k5DmEUa1spSH3LNQ9yrMF:abc
+IPFS Hash of uploaded file:  
+Mining...
+the balance is 1224: 

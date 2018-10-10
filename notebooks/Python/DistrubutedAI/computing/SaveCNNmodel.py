@@ -37,7 +37,7 @@ def max_pool_2x2(x):
 #Create model
 def multilayer_preceptron(x,weights,biases):
     #now,we want to change this to a CNN network
-    #first,reshape the data to 4_D ,
+    #first,reshape the dataProvider to 4_D ,
     x_image=tf.reshape(x,[-1,28,28,1])
     #then apply cnn layers ,cnn layer and activation function --relu
     h_conv1=tf.nn.relu(conv2d(x_image,weights['conv1'])+biases['conv_b1'])
@@ -91,7 +91,7 @@ with tf.Session() as sess:
     model_saver.save(sess,os.path.join(model_dir,model_name))
     print("model saved sucessfully!! the path is in flie uploadModel")
     # readAllEpoch()
-# 3. upload model and data 多轮上传模型，数据？ round1, 2, 3?
+# 3. upload model and dataProvider 多轮上传模型，数据？ round1, 2, 3?
 # url = "http://text"
 # clientId = "1111"
 # clientKey = "2222"
@@ -100,8 +100,8 @@ with tf.Session() as sess:
 #
 # header = {'clientId': clientId, 'timestap': timestap, 'clientSecret': clientSecret}
 # files = {'zip':open('~/Workspaces/DistributedAI/notebooks/Python/DistrubutedAI/computing/mnist.zip','rb')}
-# data = {'enctype': 'multipart/form-data', 'name': 'liu'}
-# reponse = requests.post(url, data=data, header=header, files=files)
+# dataProvider = {'enctype': 'multipart/form-dataProvider', 'name': 'liu'}
+# reponse = requests.post(url, dataProvider=dataProvider, header=header, files=files)
 # text = reponse.text
 # print(text)
 #
@@ -110,8 +110,8 @@ with tf.Session() as sess:
 # read trained CNN model
 # def readAllEpoch():
 #     with open("allEpoch.pickle", 'rb') as f:
-#         data = pickle.load(f)
-#     print("---------->len:",len(data["conv1"]))
+#         dataProvider = pickle.load(f)
+#     print("---------->len:",len(dataProvider["conv1"]))
 
 def averageWeight(nums, weights, biases):
     average_weights = sum(weights) / len(weights)

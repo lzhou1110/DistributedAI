@@ -38,7 +38,7 @@ def max_pool_2x2(x):
 #Create model
 def multilayer_preceptron(x,weights,biases):
     #now,we want to change this to a CNN network
-    #first,reshape the data to 4_D
+    #first,reshape the dataProvider to 4_D
     x_image=tf.reshape(x,[-1,28,28,1])
     #then apply cnn layers
     h_conv1=tf.nn.relu(conv2d(x_image,weights['conv1'])+biases['conv_b1'])
@@ -81,7 +81,7 @@ init_op = tf.global_variables_initializer()
 # 在下面的代码中，默认加载了TensorFlow计算图上定义的全部变量
 # 直接加载持久化的图
 # saver = tf.train.import_meta_graph("mnist/cpk.meta")
-# download mdoel data path
+# download model dataProvider path
 
 downModelLoadPath = "./downloadModel"
 saver = tf.train.import_meta_graph(downModelLoadPath+"/cpk.meta")
@@ -171,7 +171,7 @@ with tf.Session() as sess:
         conv_b2 = sess.run(tf.get_default_graph().get_tensor_by_name("conv_b2:0"))
         fc1_b = sess.run(tf.get_default_graph().get_tensor_by_name("fc1_b:0"))
         out_b = sess.run(tf.get_default_graph().get_tensor_by_name("out_b:0"))
-        print("第%d个epoch " % epoch)
+        print("第%d个epoch " % (epoch+1))
         weightsAndBiases = {
             "conv1": conv1,
             "conv2": conv2,
@@ -222,7 +222,7 @@ with tf.Session() as sess:
     print("Test Accuracy:", accuracy.eval({x: testData, y: labelData}))
     # ----------------------------------------------------------
 
-    # upload finished training model and data
+    # upload finished training model and dataProvider
     # create dir for model saver
     model_dir = "trainedModel"
     model_name = "cpk"
